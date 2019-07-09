@@ -29,7 +29,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class HomeActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
     Fragment mHomeFragment, mComposeFragment, mProfileFragment;
     FragmentManager mFragmentManager;
 
@@ -39,7 +39,7 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.activity_main);
 
         ButterKnife.bind(this);
 
@@ -110,7 +110,7 @@ public class HomeActivity extends AppCompatActivity {
             if(e == null) {
                 Toast.makeText(this, "Post saved successfully", Toast.LENGTH_SHORT).show();
             } else {
-                Log.e("HomeActivity", "Could not save post", e);
+                Log.e("MainActivity", "Could not save post", e);
             }
         });
     }
@@ -120,14 +120,14 @@ public class HomeActivity extends AppCompatActivity {
         query.findInBackground((List<Post> posts, ParseException e) -> {
             if(e == null) {
                 for(int i = 0; i < posts.size(); i++) {
-                    Log.d("HomeActivity",
+                    Log.d("MainActivity",
                             String.format("Post[%d] = %s, username = %s",
                                     i,
                                     posts.get(i).getDescription(),
                                     posts.get(i).getUser().getUsername()));
                 }
             } else {
-                Log.e("HomeActivity", "Couldn't load posts", e);
+                Log.e("MainActivity", "Couldn't load posts", e);
             }
         });
     }

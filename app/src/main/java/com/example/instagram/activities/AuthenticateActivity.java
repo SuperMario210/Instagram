@@ -165,7 +165,7 @@ public class AuthenticateActivity extends AppCompatActivity {
 
     public void switchToHomeActivity(View view) {
         Toast.makeText(this, "Logged in user successfully", Toast.LENGTH_SHORT).show();
-        Intent i = new Intent(this, HomeActivity.class);
+        Intent i = new Intent(this, MainActivity.class);
         startActivity(i);
         finish();
     }
