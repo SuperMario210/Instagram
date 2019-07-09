@@ -5,15 +5,20 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.example.instagram.R;
+import com.example.instagram.fragments.ComposeFragment;
 import com.example.instagram.models.Post;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
@@ -21,22 +26,54 @@ import com.parse.ParseUser;
 import java.io.File;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class HomeActivity extends AppCompatActivity {
+    Fragment mHomeFragment, mComposeFragment, mProfileFragment;
+    FragmentManager mFragmentManager;
+
+    @BindView(R.id.fl_container) FrameLayout flContainer;
+    @BindView(R.id.bottom_navigation) BottomNavigationView bnMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        ButterKnife.bind(this);
+
+        // Initialize fragments
+        mComposeFragment = new ComposeFragment();
+        mFragmentManager = getSupportFragmentManager();
+
+        initializeBottomNavigation();
 //        requestPerms();
-        testQuery();
+//        testQuery();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(requestCode == 0) {
-            testPost();
-        }
+    private void initializeBottomNavigation() {
+        bnMenu.setOnNavigationItemSelectedListener(item -> {
+            Fragment newFragment = mComposeFragment;
+            switch (item.getItemId()) {
+                case R.id.action_home:
+                    Toast.makeText(this, "Home Fragment", Toast.LENGTH_SHORT).show();
+//                    newFragment = mHomeFragment;
+                    break;
+                case R.id.action_compose:
+                    newFragment = mComposeFragment;
+                    break;
+                case R.id.action_profile:
+                default:
+                    Toast.makeText(this, "Profile Fragment", Toast.LENGTH_SHORT).show();
+//                    newFragment = mProfileFragment;
+                    break;
+            }
+            mFragmentManager.beginTransaction().replace(R.id.fl_container, newFragment).commit();
+            return true;
+        });
+
+        bnMenu.setSelectedItemId(R.id.action_compose);
     }
 
     private void requestPerms() {
@@ -54,6 +91,13 @@ public class HomeActivity extends AppCompatActivity {
             // app-defined int constant. The callback method gets the
             // result of the request.
         } else {
+            testPost();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if(requestCode == 0) {
             testPost();
         }
     }

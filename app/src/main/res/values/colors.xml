@@ -7,7 +7,7 @@
     <color name="ads_manager_title_color">#de000000</color>
     <color name="avatar_stroke">@color/black_20_transparent</color>
     <color name="bioTextEntityFontColor">@color/blue_8</color>
-    <color name="black">#ff000000</color>
+    <color name="black">#000000</color>
     <color name="black_10_transparent">#1a000000</color>
     <color name="black_15_transparent">#26000000</color>
     <color name="black_20_transparent">#33000000</color>
@@ -22,7 +22,7 @@
     <color name="black_70_transparent">#b3000000</color>
     <color name="black_80_transparent">#cd000000</color>
     <color name="black_8_transparent">#14000000</color>
-    <color name="black_90_transparent">#e6000000</color>
+    <color name="black_90_transparent">#E6000000</color>
     <color name="black_95_transparent">#f2000000</color>
     <color name="blue_0">#fff4faff</color>
     <color name="blue_1">#ffdfefff</color>
@@ -34,7 +34,7 @@
     <color name="blue_5_20_transparent">#333897f0</color>
     <color name="blue_5_30_transparent">#4d3897f0</color>
     <color name="blue_5_70_transparent">#b33897f0</color>
-    <color name="blue_6">#ff1372cc</color>
+    <color name="blue_6">#1372CC</color>
     <color name="blue_7">#ff0053a4</color>
     <color name="blue_8">#ff003569</color>
     <color name="blue_9">#ff00264a</color>
@@ -53,7 +53,7 @@
     <color name="blueteal_9">#ff126a89</color>
     <color name="blur_mask_tint_color">#66f1f1f1</color>
     <color name="body_text">#ff999999</color>
-    <color name="border_color">#ffcccccc</color>
+    <color name="border_color">#CCCCCC</color>
     <color name="bottomsheet_background_dimmer_color">@color/black_50_transparent</color>
     <color name="browser_alternative_subtitle_color">#ff8a9ccd</color>
     <color name="browser_burd_url_bar_foreground_color">#ff9daccb</color>
@@ -105,7 +105,7 @@
     <color name="default_slideout_icon_background_border">#33ffffff</color>
     <color name="default_slideout_icon_text_color">@color/white</color>
     <color name="dialog_background">#55000000</color>
-    <color name="dialog_text_color">#ff2d3237</color>
+    <color name="dialog_text_color">#2D3237</color>
     <color name="direct_blue_gradient_dark">#ff0b70e1</color>
     <color name="direct_blue_gradient_light">#ff42b8f7</color>
     <color name="direct_blue_ring_gradient_colour1">#ff4ac9ff</color>
@@ -258,7 +258,7 @@
     <color name="transparent">#00000000</color>
     <color name="tray_avatar_white_border_color">@color/white</color>
     <color name="tray_item_border_color">@color/black</color>
-    <color name="white">#ffffffff</color>
+    <color name="white">#FFFFFF</color>
     <color name="white_10_transparent">#1affffff</color>
     <color name="white_20_transparent">#33ffffff</color>
     <color name="white_25_transparent">#40ffffff</color>
