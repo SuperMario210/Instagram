@@ -18,10 +18,10 @@ import androidx.fragment.app.FragmentManager;
 import com.example.instagram.R;
 import com.example.instagram.fragments.ComposeFragment;
 import com.example.instagram.models.Post;
+import com.example.instagram.models.User;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.parse.ParseException;
 import com.parse.ParseFile;
-import com.parse.ParseUser;
 
 import java.io.File;
 import java.util.List;
@@ -106,7 +106,7 @@ public class HomeActivity extends AppCompatActivity {
         File f = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "test.jpg");
         ParseFile file = new ParseFile(f);
 
-        Post.createPost("test post", file, ParseUser.getCurrentUser(), (ParseException e) -> {
+        Post.createPost("test post", file, User.getCurrentUser(), (ParseException e) -> {
             if(e == null) {
                 Toast.makeText(this, "Post saved successfully", Toast.LENGTH_SHORT).show();
             } else {

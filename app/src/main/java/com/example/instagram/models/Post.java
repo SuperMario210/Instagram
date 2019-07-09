@@ -19,10 +19,10 @@ public class Post extends ParseObject {
     private static final String KEY_USER = "user";
 
     public static Post createPost(String description, ParseFile image,
-                                  ParseUser user, final SaveCallback callback) {
+                                  User user, final SaveCallback callback) {
         final Post newPost = new Post();
         newPost.setDescription(description);
-        newPost.setUser(user);
+        newPost.setUser(user.getParseUser());
 
         // Set the image the save the post after the image has finished saving
         newPost.setImage(image, e -> {

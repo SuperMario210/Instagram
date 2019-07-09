@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -27,7 +28,11 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.camerakit.CameraKitView;
 import com.example.instagram.R;
 import com.example.instagram.models.GlideApp;
+import com.example.instagram.models.Post;
+import com.example.instagram.models.User;
 import com.example.instagram.util.BitmapUtils;
+import com.parse.ParseException;
+import com.parse.ParseFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -50,6 +55,7 @@ public class ComposeFragment extends Fragment {
     @BindView(R.id.iv_preview) ImageView ivPreview;
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.tv_share) TextView tvShare;
+    @BindView(R.id.et_caption) EditText etCaption;
 
     /**
      * This enum holds the different states that the compose fragment can be in (taking a picture,
@@ -144,10 +150,6 @@ public class ComposeFragment extends Fragment {
         });
         toolbar.setNavigationIcon(R.drawable.ic_vector_back);
         tvShare.setVisibility(View.VISIBLE);
-        tvShare.setOnClickListener(v -> {
-            // todo: submit post!
-            Toast.makeText(getContext(), "Submit post!", Toast.LENGTH_SHORT).show();
-        });
     }
 
     /**
@@ -179,32 +181,17 @@ public class ComposeFragment extends Fragment {
      */
     private void handleImageCapture(final byte[] capturedImage) {
         // Decode the image into a bitmap
-        Bitmap bitmap = BitmapFactory.decodeByteArray(capturedImage, 0, capturedImage.length);
+        mBitmap = BitmapFactory.decodeByteArray(capturedImage, 0, capturedImage.length);
 
         // Crop and scale the bitmap
-        bitmap = BitmapUtils.cropToAspectRatio(bitmap, 1, 1);
-        mBitmap = BitmapUtils.scaleToFitWidth(bitmap, 1024);
+        mBitmap = BitmapUtils.cropToAspectRatio(mBitmap, 1, 1);
+        mBitmap = BitmapUtils.scaleToFitWidth(mBitmap, 1024);
 
         // Display the bitmap in the preview image view
         ivPreview.setImageBitmap(mBitmap);
         ivPreview.setVisibility(View.VISIBLE);
 
-        // Configure byte output stream
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        // Compress the image further
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
-        // Create a new file for the resized bitmap (`getPhotoFileUri` defined above)
-        File imageFile = getPhotoFileUri("temp");
-
-        try {
-            imageFile.createNewFile();
-            FileOutputStream fos = new FileOutputStream(imageFile);
-            // Write the bytes of the bitmap to file
-            fos.write(bytes.toByteArray());
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        tvShare.setOnClickListener(v -> submitPost());
     }
 
     @Override
@@ -237,5 +224,45 @@ public class ComposeFragment extends Fragment {
     @Override public void onDestroyView() {
         super.onDestroyView();
         mUnbinder.unbind();
+    }
+
+    /**
+     * Creates a new post from the image currently stored in mBitmap and the caption written in
+     * etCaption
+     */
+    private void submitPost() {
+        // Configure byte output stream
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        // Compress the image further
+        mBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
+
+        // Create a new file for the resized bitmap (`getPhotoFileUri` defined above)
+        File imageFile = getPhotoFileUri("temp.jpg");
+        try {
+            imageFile.createNewFile();
+            FileOutputStream fos = new FileOutputStream(imageFile);
+            // Write the bytes of the bitmap to file
+            fos.write(bytes.toByteArray());
+            fos.close();
+
+            // Create the parseFile image and caption
+            ParseFile image = new ParseFile(imageFile);
+            String caption = etCaption.getText().toString();
+
+            // todo show some sort of loading indicator
+            // Create the post
+            Post.createPost(caption, image, User.getCurrentUser(), (ParseException e) -> {
+                if(e == null) {
+                    Toast.makeText(getContext(), "Post shared successfully", Toast.LENGTH_SHORT).show();
+                    // todo: switch to home activity
+                } else {
+                    Log.e("ComposeFragment", "Could not save post", e);
+                    Toast.makeText(getContext(), "Couldn't share post!", Toast.LENGTH_LONG);
+                }
+            });
+        } catch (IOException e) {
+            Log.e("ComposeFragment", "Couldn't write image to file", e);
+            Toast.makeText(getContext(), "Couldn't share post!", Toast.LENGTH_LONG);
+        }
     }
 }

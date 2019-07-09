@@ -49,6 +49,10 @@ public class User {
         mUser.signUpInBackground(callback);
     }
 
+    public ParseUser getParseUser() {
+        return mUser;
+    }
+
     public static ParseQuery isUsernameAvailable(String username, BooleanCallback callback) {
         ParseQuery<ParseUser> query = ParseUser.getQuery().whereEqualTo("username", username);
         query.findInBackground((users, e) -> {
@@ -72,6 +76,5 @@ public class User {
         ParseUser.logInInBackground(username, password,
                 (user, e) -> callback.done(new User(user), e));
     }
-
 
 }
