@@ -16,12 +16,12 @@
         <ImageView
             android:id="@+id/iv_logo"
             android:layout_width="200dp"
-            android:layout_height="120dp"
+            android:layout_height="200dp"
             android:scaleType="fitCenter"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_instagram_logo" />
+            app:srcCompat="@drawable/profile" />
 
         <EditText
             android:id="@+id/et_username"
@@ -80,15 +80,28 @@
             android:layout_marginEnd="24dp"
             android:layout_marginRight="24dp"
             android:background="@drawable/button_blue"
+            android:enabled="false"
             android:minHeight="44dip"
-            android:onClick="onLoginClick"
-            android:text="Log In"
+            android:onClick="onCreateClick"
+            android:text="Create Account"
             android:textAllCaps="false"
             android:textColor="@color/reel_background_content_white_gradient_start"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/et_password" />
+
+        <TextView
+            android:id="@+id/tv_username_unavailable"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:text="The username test is not available"
+            android:textColor="@color/red_5"
+            android:textSize="12sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/et_username"
+            app:layout_constraintStart_toStartOf="@+id/et_username" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

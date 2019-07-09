@@ -25,7 +25,15 @@ public class Post extends ParseObject {
         newPost.setUser(user);
 
         // Set the image the save the post after the image has finished saving
-        newPost.setImage(image, e -> newPost.saveInBackground(callback));
+        newPost.setImage(image, e -> {
+            if(e == null) {
+                // If the image is set successfully then save the post
+                newPost.saveInBackground(callback);
+            } else {
+                // If there is an error then pass it along to the callback
+                callback.done(e);
+            }
+        });
 
         return newPost;
     }
@@ -48,12 +56,12 @@ public class Post extends ParseObject {
             if(e == null) {
                 // After the image has finished saving, set it
                 put(KEY_IMAGE, image);
-
-                // If there is a callback defined then run it
-                if (callback != null) callback.done(null);
             } else {
                 Log.e("Post", "Could not save image", e);
             }
+
+            // If there is a callback defined then run it
+            if (callback != null) callback.done(e);
         });
     }
 

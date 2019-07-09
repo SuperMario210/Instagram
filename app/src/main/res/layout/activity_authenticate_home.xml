@@ -25,6 +25,7 @@
             android:layout_marginRight="16dp"
             android:background="@drawable/button_blue"
             android:minHeight="44dip"
+            android:onClick="switchToCreateView"
             android:text="Create New Account"
             android:textAllCaps="false"
             android:textColor="@color/reel_background_content_white_gradient_start"
@@ -43,7 +44,7 @@
             app:srcCompat="@drawable/ic_instagram_logo" />
 
         <Button
-            android:id="@+id/btn_log_in"
+            android:id="@+id/btn_login"
             style="?android:attr/borderlessButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
