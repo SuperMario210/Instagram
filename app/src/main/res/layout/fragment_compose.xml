@@ -6,22 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".fragments.ComposeFragment">
 
-    <com.camerakit.CameraKitView
+    <TextureView
         android:id="@+id/camera"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:adjustViewBounds="true"
-        android:keepScreenOn="true"
-        app:camera_facing="back"
-        app:camera_flash="auto"
-        app:camera_focus="continuous"
-        app:camera_permissions="camera"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
-    </com.camerakit.CameraKitView>
+    </TextureView>
 
     <Space
         android:id="@+id/space"

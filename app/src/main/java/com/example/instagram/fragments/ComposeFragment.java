@@ -1,15 +1,20 @@
 package com.example.instagram.fragments;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.annotation.TargetApi;
-import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.util.Rational;
+import android.util.Size;
 import android.view.LayoutInflater;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
@@ -22,16 +27,23 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.camera.core.CameraX;
+import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageCaptureConfig;
+import androidx.camera.core.Preview;
+import androidx.camera.core.PreviewConfig;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.exifinterface.media.ExifInterface;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
-import com.camerakit.CameraKitView;
 import com.example.instagram.R;
 import com.example.instagram.models.GlideApp;
 import com.example.instagram.models.Post;
 import com.example.instagram.models.User;
 import com.example.instagram.util.BitmapUtils;
+import com.example.instagram.util.OrientationUtils;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 
@@ -45,14 +57,23 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
 public class ComposeFragment extends Fragment {
+    // Directory to save images in
     private static final String APP_TAG = "fbu_instagram";
+    // Request code for camera permission
+    private static final int CAMERA_PERMISSION_REQUEST_CODE = 10;
 
     private Unbinder mUnbinder;
     private Bitmap mBitmap;
     private View mView;
     private OnFragmentClosedListener mClosedListener;
 
-    @BindView(R.id.camera) CameraKitView mCameraView;
+    // CameraX variables
+    private ImageCapture mImageCapture;
+    private Preview mPreview;
+    private Preview.OnPreviewOutputUpdateListener mPreviewListener;
+
+
+    @BindView(R.id.camera) TextureView mCameraView;
     @BindView(R.id.fl_options) FrameLayout flOptions;
     @BindView(R.id.iv_shutter) ImageView ivShutter;
     @BindView(R.id.iv_preview) ImageView ivPreview;
@@ -82,17 +103,118 @@ public class ComposeFragment extends Fragment {
         return view;
     }
 
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         mView = view;
+
+        // Check camera permissions and request them if necessary
+        if (isCameraPermissionGranted()) {
+            mCameraView.post(this::startCamera);
+        } else {
+            ActivityCompat.requestPermissions(getActivity(),
+                     new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUEST_CODE);
+        }
+
+        // Every time the provided texture view changes, recompute the layout to ensure that the
+        // preview displays correctly
+        mCameraView.addOnLayoutChangeListener(
+                (v, i1, i2, i3, i4, i5, i6, i7, i8) -> updateTransform());
+
+        // Setup the view
         switchToPictureView();
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
+    public void onResume() {
+        super.onResume();
+        if(mCurrentState == ComposeState.PICTURE && mPreview != null)
+            mPreview.setOnPreviewOutputUpdateListener(mPreviewListener);
+    }
+    @Override
+    public void onPause() {
+        mPreview.removePreviewOutputListener();
+        super.onPause();
+    }
+    @Override
+    public void onStop() {
+        mPreview.removePreviewOutputListener();
+        super.onStop();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
+            if (isCameraPermissionGranted()) {
+                mCameraView.post(this::startCamera);
+            } else {
+                Toast.makeText(getContext(), "Permissions not granted by the user.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override public void onDestroyView() {
+        super.onDestroyView();
+        mUnbinder.unbind();
+    }
+
+    /**
+     * Updates the transformation to ensure the camera preview is displayed correctly
+     */
+    @TargetApi(21)
+    private void updateTransform() {
+        Matrix matrix = new Matrix();
+
+        // Compute the center of the view finder
+        float centerX = mCameraView.getWidth() / 2f;
+        float centerY = mCameraView.getHeight() / 2f;
+
+        // Correct preview output to account for display rotation
+        float rotationDegrees =
+                OrientationUtils.displayRotationToDegrees(mCameraView.getDisplay().getRotation());
+        matrix.postRotate(-rotationDegrees, centerX, centerY);
+
+        // Finally, apply transformations to our TextureView
+        mCameraView.setTransform(matrix);
+    }
+
+    /**
+     * Initialize the camera preview and image capture
+     */
+    @TargetApi(21)
+    private void startCamera() {
+        int width = mCameraView.getWidth();
+        int height = mCameraView.getHeight();
+
+        // Create configuration object for the preview use case
+        PreviewConfig config = new PreviewConfig.Builder()
+                .setTargetAspectRatio(new Rational(width, height))
+                .setTargetResolution(new Size(width, height))
+                .build();
+        mPreview = new Preview(config);
+
+        // Create a preview listener to update the viewfinder
+        mPreviewListener = (output) -> {
+            ViewGroup parent = (ViewGroup) mCameraView.getParent(); //TODO TRY REMOVE THIS
+            parent.removeView(mCameraView);
+            parent.addView(mCameraView, 0);
+
+            mCameraView.setSurfaceTexture(output.getSurfaceTexture());
+            updateTransform();
+        };
+        mPreview.setOnPreviewOutputUpdateListener(mPreviewListener);
+
+        // Create configuration object for the image capture use case
+        ImageCaptureConfig imageCaptureConfig = new ImageCaptureConfig.Builder()
+                .setTargetAspectRatio(new Rational(width, height))
+                .setCaptureMode(ImageCapture.CaptureMode.MIN_LATENCY)
+                .build();
+        mImageCapture = new ImageCapture(imageCaptureConfig);
+
+        // Bind use cases to lifecycle
+        CameraX.bindToLifecycle(this, mPreview, mImageCapture);
+
     }
 
     /**
@@ -120,20 +242,25 @@ public class ComposeFragment extends Fragment {
 
         // Handle shutter press
         ivShutter.setOnClickListener(v -> {
-            // Capture the image using CameraKit
-            mCameraView.captureImage((CameraKitView cameraKitView, final byte[] capturedImage) -> {
-                mCameraView.onStop();
-                mCameraView = null;
-                Toast.makeText(getContext(), "Picture taken", Toast.LENGTH_SHORT).show();
-                handleImageCapture(capturedImage);
+            mImageCapture.takePicture(getPhotoFileUri("temp"), new ImageCapture.OnImageSavedListener() {
+                @Override
+                public void onImageSaved(@NonNull File file) {
+                    Toast.makeText(getContext(), "Image saved sucessfully", Toast.LENGTH_SHORT).show();
+                    mPreview.removePreviewOutputListener();
+                    handleImageCapture(file);
+                }
+
+                @Override
+                public void onError(@NonNull ImageCapture.UseCaseError useCaseError, @NonNull String message, @Nullable Throwable cause) {
+                    Toast.makeText(getContext(), "Error saving image", Toast.LENGTH_SHORT).show();
+                }
             });
 
             switchToCaptionView();
         });
 
         // Start the camera
-        mCameraView = mView.findViewById(R.id.camera);
-        mCameraView.onStart();
+        if(mPreview != null) mPreview.setOnPreviewOutputUpdateListener(mPreviewListener);
     }
 
     /**
@@ -166,7 +293,7 @@ public class ComposeFragment extends Fragment {
      * @param fileName the filename of the file to store the photo in
      * @return a file to store the photo in
      */
-    public File getPhotoFileUri(String fileName) {
+    private File getPhotoFileUri(String fileName) {
         // Get safe storage directory for photos
         // Use `getExternalFilesDir` on Context to access package-specific directories.
         // This way, we don't need to request external read/write runtime permissions.
@@ -186,11 +313,24 @@ public class ComposeFragment extends Fragment {
     /**
      * Handles an image captured by cameraKit.  Scales, crops, and displays the image
      *
-     * @param capturedImage the captured image returned by cameraKit
+     * @param imageFile the file of the captured image returned by cameraX
      */
-    private void handleImageCapture(final byte[] capturedImage) {
+    private void handleImageCapture(final File imageFile) {
+        int rotationInDegrees = 0;
+        try {
+            ExifInterface exif = new ExifInterface(imageFile.getPath());
+            rotationInDegrees = OrientationUtils.exifToDegrees(
+                    exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Matrix matrix = new Matrix();
+        if (rotationInDegrees != 0) {matrix.preRotate(rotationInDegrees);}
+
         // Decode the image into a bitmap
-        mBitmap = BitmapFactory.decodeByteArray(capturedImage, 0, capturedImage.length);
+        mBitmap = BitmapFactory.decodeFile(imageFile.getPath());
+        mBitmap = Bitmap.createBitmap(mBitmap, 0, 0, mBitmap.getWidth(), mBitmap.getHeight(), matrix, true);
 
         // Crop and scale the bitmap
         mBitmap = BitmapUtils.cropToAspectRatio(mBitmap, 1, 1);
@@ -203,36 +343,13 @@ public class ComposeFragment extends Fragment {
         tvShare.setOnClickListener(v -> submitPost());
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if(mCurrentState == ComposeState.PICTURE)
-            mCameraView.onResume();
-    }
-    @Override
-    public void onPause() {
-        mCameraView.onPause();
-        super.onPause();
-    }
-    @Override
-    public void onStop() {
-        mCameraView.onStop();
-        super.onStop();
-    }
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        mCameraView.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
-    @Override public void onDestroyView() {
-        super.onDestroyView();
-        mUnbinder.unbind();
+    /**
+     * Checks if the camera permission is granted
+     * @return true if the camera permission is granted, false if not
+     */
+    private boolean isCameraPermissionGranted() {
+        return ContextCompat.checkSelfPermission(
+                getContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
@@ -295,6 +412,6 @@ public class ComposeFragment extends Fragment {
     }
 
     public interface OnFragmentClosedListener {
-        public void onFragmentClosed();
+        void onFragmentClosed();
     }
 }
