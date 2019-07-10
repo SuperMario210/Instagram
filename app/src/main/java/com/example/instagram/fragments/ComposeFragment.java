@@ -48,6 +48,7 @@ public class ComposeFragment extends Fragment {
 
     private Unbinder mUnbinder;
     private Bitmap mBitmap;
+    private View mView;
 
     @BindView(R.id.camera) CameraKitView mCameraView;
     @BindView(R.id.fl_options) FrameLayout flOptions;
@@ -83,7 +84,7 @@ public class ComposeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mCameraView.onStart();
+        mView = view;
         switchToPictureView();
     }
 
@@ -113,7 +114,8 @@ public class ComposeFragment extends Fragment {
         ivShutter.setOnClickListener(v -> {
             // Capture the image using CameraKit
             mCameraView.captureImage((CameraKitView cameraKitView, final byte[] capturedImage) -> {
-                mCameraView.onPause();
+                mCameraView.onStop();
+                mCameraView = null;
                 Toast.makeText(getContext(), "Picture taken", Toast.LENGTH_SHORT).show();
                 handleImageCapture(capturedImage);
             });
@@ -122,7 +124,8 @@ public class ComposeFragment extends Fragment {
         });
 
         // Start the camera
-        mCameraView.onResume();
+        mCameraView = mView.findViewById(R.id.camera);
+        mCameraView.onStart();
     }
 
     /**
@@ -145,9 +148,7 @@ public class ComposeFragment extends Fragment {
         anim.start();
 
         // Setup the toolbar
-        toolbar.setNavigationOnClickListener(v -> {
-            switchToPictureView();
-        });
+        toolbar.setNavigationOnClickListener(v -> switchToPictureView());
         toolbar.setNavigationIcon(R.drawable.ic_vector_back);
         tvShare.setVisibility(View.VISIBLE);
     }
@@ -188,8 +189,8 @@ public class ComposeFragment extends Fragment {
         mBitmap = BitmapUtils.scaleToFitWidth(mBitmap, 1024);
 
         // Display the bitmap in the preview image view
-        ivPreview.setImageBitmap(mBitmap);
         ivPreview.setVisibility(View.VISIBLE);
+        ivPreview.setImageBitmap(mBitmap);
 
         tvShare.setOnClickListener(v -> submitPost());
     }

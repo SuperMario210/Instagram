@@ -12,11 +12,16 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 @ParseClassName("Post")
 public class Post extends ParseObject {
     private static final String KEY_DESCRIPTION = "description";
     private static final String KEY_IMAGE = "image";
     private static final String KEY_USER = "user";
+    private static final String KEY_CREATED_AT = "createdAt";
 
     public static Post createPost(String description, ParseFile image,
                                   User user, final SaveCallback callback) {
@@ -71,6 +76,12 @@ public class Post extends ParseObject {
 
     public void setUser(ParseUser user) {
         put(KEY_USER, user);
+    }
+
+    public static String formatDate(Date date) {
+        String timeFormat = (date.getYear() != new Date().getYear()) ? "MMM dd yyyy" : "MMM dd";
+        SimpleDateFormat sdf = new SimpleDateFormat(timeFormat, Locale.ENGLISH);
+        return sdf.format(date);
     }
 
     public static class Query extends ParseQuery<Post> {

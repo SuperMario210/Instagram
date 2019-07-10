@@ -17,6 +17,7 @@ import androidx.fragment.app.FragmentManager;
 
 import com.example.instagram.R;
 import com.example.instagram.fragments.ComposeFragment;
+import com.example.instagram.fragments.HomeFragment;
 import com.example.instagram.models.Post;
 import com.example.instagram.models.User;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize fragments
         mComposeFragment = new ComposeFragment();
+        mHomeFragment = new HomeFragment();
         mFragmentManager = getSupportFragmentManager();
 
         initializeBottomNavigation();
@@ -54,11 +56,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeBottomNavigation() {
         bnMenu.setOnNavigationItemSelectedListener(item -> {
-            Fragment newFragment = mComposeFragment;
+            Fragment newFragment = mHomeFragment;
             switch (item.getItemId()) {
                 case R.id.action_home:
-                    Toast.makeText(this, "Home Fragment", Toast.LENGTH_SHORT).show();
-//                    newFragment = mHomeFragment;
+                    newFragment = mHomeFragment;
                     break;
                 case R.id.action_compose:
                     newFragment = mComposeFragment;
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        bnMenu.setSelectedItemId(R.id.action_compose);
+        bnMenu.setSelectedItemId(R.id.action_home);
     }
 
     private void requestPerms() {
