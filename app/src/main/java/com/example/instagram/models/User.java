@@ -54,7 +54,9 @@ public class User {
     }
 
     public static ParseQuery isUsernameAvailable(String username, BooleanCallback callback) {
-        ParseQuery<ParseUser> query = ParseUser.getQuery().whereEqualTo("username", username);
+        ParseQuery<ParseUser> query = ParseUser.getQuery()
+                .whereEqualTo("username", username)
+                .setLimit(1);
         query.findInBackground((users, e) -> {
             if(e == null) {
                 callback.done(users.isEmpty());

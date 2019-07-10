@@ -38,6 +38,7 @@ import androidx.exifinterface.media.ExifInterface;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.example.instagram.BlurringTextureView;
 import com.example.instagram.R;
 import com.example.instagram.models.GlideApp;
 import com.example.instagram.models.Post;
@@ -55,6 +56,7 @@ import java.io.IOException;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import io.alterac.blurkit.BlurLayout;
 
 public class ComposeFragment extends Fragment {
     // Directory to save images in
@@ -73,13 +75,14 @@ public class ComposeFragment extends Fragment {
     private Preview.OnPreviewOutputUpdateListener mPreviewListener;
 
 
-    @BindView(R.id.camera) TextureView mCameraView;
+    @BindView(R.id.camera) BlurringTextureView mCameraView;
     @BindView(R.id.fl_options) FrameLayout flOptions;
     @BindView(R.id.iv_shutter) ImageView ivShutter;
     @BindView(R.id.iv_preview) ImageView ivPreview;
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.tv_share) TextView tvShare;
     @BindView(R.id.et_caption) EditText etCaption;
+    @BindView(R.id.blur_layout) BlurLayout blurLayout;
 
     /**
      * This enum holds the different states that the compose fragment can be in (taking a picture,
@@ -127,6 +130,12 @@ public class ComposeFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        blurLayout.startBlur();
+        super.onStart();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         if(mCurrentState == ComposeState.PICTURE && mPreview != null)
@@ -134,11 +143,12 @@ public class ComposeFragment extends Fragment {
     }
     @Override
     public void onPause() {
-        mPreview.removePreviewOutputListener();
+        if(mPreview != null) mPreview.removePreviewOutputListener();
         super.onPause();
     }
     @Override
     public void onStop() {
+        blurLayout.pauseBlur();
         mPreview.removePreviewOutputListener();
         super.onStop();
     }
@@ -201,6 +211,7 @@ public class ComposeFragment extends Fragment {
             parent.addView(mCameraView, 0);
 
             mCameraView.setSurfaceTexture(output.getSurfaceTexture());
+//            mCameraView.onSurfaceTextureAvailable(output.getSurfaceTexture(), 0, 0);
             updateTransform();
         };
         mPreview.setOnPreviewOutputUpdateListener(mPreviewListener);

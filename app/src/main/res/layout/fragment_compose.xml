@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".fragments.ComposeFragment">
 
-    <TextureView
+    <com.example.instagram.BlurringTextureView
         android:id="@+id/camera"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -15,7 +15,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
-    </TextureView>
+    </com.example.instagram.BlurringTextureView>
 
     <Space
         android:id="@+id/space"
@@ -26,17 +26,6 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar" />
-
-    <!--<eightbitlab.com.blurview.BlurView-->
-        <!--android:id="@+id/blur_container"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="200dp"-->
-        <!--app:layout_constraintBottom_toBottomOf="@+id/camera"-->
-        <!--app:layout_constraintTop_toBottomOf="@+id/space">-->
-
-        <!--&lt;!&ndash;Any child View here, TabLayout for example&ndash;&gt;-->
-
-    <!--</eightbitlab.com.blurview.BlurView>-->
 
     <ImageView
         android:id="@+id/iv_shade"
@@ -136,6 +125,17 @@
             tools:layout_editor_absoluteX="125dp"
             tools:layout_editor_absoluteY="18dp" />
     </androidx.appcompat.widget.Toolbar>
+
+    <io.alterac.blurkit.BlurLayout xmlns:blurkit="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/blur_layout"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        app:layout_constraintBottom_toBottomOf="@+id/space"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        blurkit:blk_fps="0" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
