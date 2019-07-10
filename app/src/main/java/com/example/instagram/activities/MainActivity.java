@@ -30,9 +30,12 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
-    Fragment mHomeFragment, mComposeFragment, mProfileFragment;
+public class MainActivity extends AppCompatActivity implements ComposeFragment.OnFragmentClosedListener {
+    HomeFragment mHomeFragment;
+    ComposeFragment mComposeFragment;
+    Fragment mProfileFragment;
     FragmentManager mFragmentManager;
+    Fragment mCurrentFragment;
 
     @BindView(R.id.fl_container) FrameLayout flContainer;
     @BindView(R.id.bottom_navigation) BottomNavigationView bnMenu;
@@ -54,15 +57,23 @@ public class MainActivity extends AppCompatActivity {
 //        testQuery();
     }
 
+    @Override
+    public void onAttachFragment(Fragment fragment) {
+        if (fragment instanceof ComposeFragment) {
+            ComposeFragment composeFragment = (ComposeFragment) fragment;
+            composeFragment.setOnFragmentClosedListener(this);
+        }
+    }
+
     private void initializeBottomNavigation() {
         bnMenu.setOnNavigationItemSelectedListener(item -> {
-            Fragment newFragment = mHomeFragment;
+            mCurrentFragment = mHomeFragment;
             switch (item.getItemId()) {
                 case R.id.action_home:
-                    newFragment = mHomeFragment;
+                    mCurrentFragment = mHomeFragment;
                     break;
                 case R.id.action_compose:
-                    newFragment = mComposeFragment;
+                    mCurrentFragment = mComposeFragment;
                     break;
                 case R.id.action_profile:
                 default:
@@ -70,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 //                    newFragment = mProfileFragment;
                     break;
             }
-            mFragmentManager.beginTransaction().replace(R.id.fl_container, newFragment).commit();
+            mFragmentManager.beginTransaction().replace(R.id.fl_container, mCurrentFragment).commit();
             return true;
         });
 
@@ -131,5 +142,18 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("MainActivity", "Couldn't load posts", e);
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(mCurrentFragment == mComposeFragment) {
+            mComposeFragment.onBackPressed();
+        }
+    }
+
+    @Override
+    public void onFragmentClosed() {
+        mFragmentManager.beginTransaction().replace(R.id.fl_container, mHomeFragment).commit();
+        bnMenu.setSelectedItemId(R.id.action_home);
     }
 }

@@ -2,6 +2,7 @@ package com.example.instagram.fragments;
 
 import android.animation.Animator;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
@@ -49,6 +50,7 @@ public class ComposeFragment extends Fragment {
     private Unbinder mUnbinder;
     private Bitmap mBitmap;
     private View mView;
+    private OnFragmentClosedListener mClosedListener;
 
     @BindView(R.id.camera) CameraKitView mCameraView;
     @BindView(R.id.fl_options) FrameLayout flOptions;
@@ -88,6 +90,11 @@ public class ComposeFragment extends Fragment {
         switchToPictureView();
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+    }
+
     /**
      * Initializes the view for taking a picture
      */
@@ -96,6 +103,7 @@ public class ComposeFragment extends Fragment {
 
         // Setup the toolbar
         toolbar.setNavigationOnClickListener(v -> {
+            mClosedListener.onFragmentClosed();
             // todo: return to previous fragment
         });
         toolbar.setNavigationIcon(R.drawable.ic_vector_close);
@@ -265,5 +273,28 @@ public class ComposeFragment extends Fragment {
             Log.e("ComposeFragment", "Couldn't write image to file", e);
             Toast.makeText(getContext(), "Couldn't share post!", Toast.LENGTH_LONG);
         }
+    }
+
+    public void setOnFragmentClosedListener(OnFragmentClosedListener listener) {
+        mClosedListener = listener;
+    }
+
+    public void onBackPressed() {
+        switch(mCurrentState) {
+            case FILTER:
+                break;
+            case CAPTION:
+                switchToPictureView();
+                break;
+            case PICTURE:
+                mClosedListener.onFragmentClosed();
+                break;
+            default:
+                break;
+        }
+    }
+
+    public interface OnFragmentClosedListener {
+        public void onFragmentClosed();
     }
 }
