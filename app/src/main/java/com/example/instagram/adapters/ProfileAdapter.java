@@ -69,8 +69,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, int position) {
         if(holder.getItemViewType() == FIRST_ITEM) {
-            ParseUser user = ParseUser.getCurrentUser();
-            ((ProfileViewHolder) holder).bindUser(user, mContext);
+            ((ProfileViewHolder) holder).bindUser(mUser, mContext);
         } else {
             Post post = mPosts.get(position - 1);
             ((PostGridViewHolder) holder).bindPost(post, mContext);

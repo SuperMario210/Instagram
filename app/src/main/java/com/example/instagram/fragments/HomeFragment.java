@@ -13,12 +13,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.example.instagram.ParseApp;
 import com.example.instagram.R;
 import com.example.instagram.adapters.PostAdapter;
 import com.example.instagram.models.Post;
+import com.example.instagram.models.PostData;
 import com.parse.ParseException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -29,7 +30,7 @@ import butterknife.Unbinder;
 public class HomeFragment extends Fragment {
     private Unbinder mUnbinder;
     private PostAdapter mPostAdapter;
-    private List<Post> mPosts;
+    private PostData mPosts;
 
     @BindView(R.id.rv_posts) RecyclerView rvPosts;
     @BindView(R.id.swipe_container) SwipeRefreshLayout swipeContainer;
@@ -37,7 +38,6 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
@@ -53,7 +53,7 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // Setup the recycler view adapter
-        mPosts = new ArrayList<>();
+        mPosts = ((ParseApp) getContext().getApplicationContext()).getPosts();
         mPostAdapter = new PostAdapter(mPosts, getContext());
         rvPosts.setAdapter(mPostAdapter);
 
@@ -84,9 +84,9 @@ public class HomeFragment extends Fragment {
         final Post.Query query = new Post.Query().getTop().withUser().withFavorites();
         query.orderByDescending("createdAt").findInBackground((List<Post> posts, ParseException e) -> {
             if(e == null) {
-                mPosts.clear();
-                mPosts.addAll(posts);
-                mPostAdapter.notifyDataSetChanged();
+                for(Post post : posts) {
+                    mPostAdapter.notifyItemInserted(mPosts.addPost(post));
+                }
                 swipeContainer.setRefreshing(false);
             } else {
                 Log.e("MainActivity", "Couldn't load posts", e);

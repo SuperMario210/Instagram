@@ -134,6 +134,11 @@ public class Post extends ParseObject {
             return this;
         }
 
+        public Query byId(String postId) {
+            whereEqualTo("objectId", postId);
+            return this;
+        }
+
         public Query withFavorites() {
             include("favorites");
             return this;

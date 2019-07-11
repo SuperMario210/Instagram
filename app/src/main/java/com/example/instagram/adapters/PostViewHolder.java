@@ -1,6 +1,7 @@
 package com.example.instagram.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.text.SpannableStringBuilder;
@@ -17,6 +18,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.instagram.CommentActivity;
 import com.example.instagram.R;
 import com.example.instagram.models.GlideApp;
 import com.example.instagram.models.Post;
@@ -29,6 +31,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
     private ParseUser mUser;
     private Context mContext;
     private Post mPost;
+    private View mRoot;
 
     @BindView(R.id.iv_profile) ImageView ivProfile;
     @BindView(R.id.iv_post) ImageView ivPost;
@@ -44,6 +47,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
 
     public PostViewHolder(@NonNull View view) {
         super(view);
+        mRoot = view;
         ButterKnife.bind(this, view);
     }
 
@@ -66,6 +70,12 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
         GlideApp.with(mContext)
                 .load(mPost.getImage().getUrl())
                 .into(ivPost);
+
+        mRoot.setOnClickListener(v -> {
+            Intent i = new Intent(mContext, CommentActivity.class);
+            i.putExtra("postId", mPost.getObjectId());
+            mContext.startActivity(i);
+        });
 
         initFavoriteIcon();
     }

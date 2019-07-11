@@ -10,21 +10,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.instagram.R;
 import com.example.instagram.models.Post;
-
-import java.util.List;
+import com.example.instagram.models.PostData;
 
 public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
-    private List<Post> mPosts;
+    private PostData mPosts;
     private Context mContext;
 
-    public PostAdapter(List<Post> posts, Context context) {
+    public PostAdapter(PostData posts, Context context) {
         mPosts = posts;
         mContext = context;
     }
 
     // Clean all elements of the recycler
     public void clear() {
-        mPosts.clear();
+        mPosts.clearData();
         notifyDataSetChanged();
     }
 
@@ -40,7 +39,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull final PostViewHolder holder, int position) {
-        Post post = mPosts.get(position);
+        Post post = mPosts.getPostByIndex(position);
         holder.bindPost(post, mContext);
     }
 
