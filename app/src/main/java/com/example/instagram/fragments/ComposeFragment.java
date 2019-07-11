@@ -2,7 +2,6 @@ package com.example.instagram.fragments;
 
 import android.Manifest;
 import android.animation.Animator;
-import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -160,7 +159,6 @@ public class ComposeFragment extends Fragment {
     /**
      * Updates the transformation to ensure the camera preview is displayed correctly
      */
-    @TargetApi(21)
     private void updateTransform() {
         Matrix matrix = new Matrix();
 
@@ -180,7 +178,6 @@ public class ComposeFragment extends Fragment {
     /**
      * Initialize the camera preview and image capture
      */
-    @TargetApi(21)
     private void startCamera() {
         int width = mCameraView.getWidth();
         int height = mCameraView.getHeight();
@@ -262,7 +259,6 @@ public class ComposeFragment extends Fragment {
     /**
      * Initializes the view for adding a caption
      */
-    @TargetApi(21)
     private void switchToCaptionView() {
         mCurrentState = ComposeState.CAPTION;
 

@@ -1,6 +1,5 @@
 package com.example.instagram;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,7 +36,6 @@ public class CommentActivity extends AppCompatActivity {
     @BindView(R.id.et_comment) EditText etComment;
     @BindView(R.id.toolbar) Toolbar toolbar;
 
-    @TargetApi(21)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
