@@ -18,17 +18,18 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.instagram.CommentActivity;
 import com.example.instagram.R;
 import com.example.instagram.models.GlideApp;
 import com.example.instagram.models.Post;
-import com.parse.ParseUser;
+import com.example.instagram.models.User;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class PostViewHolder extends RecyclerView.ViewHolder {
-    private ParseUser mUser;
+    private User mUser;
     private Context mContext;
     private Post mPost;
     private View mRoot;
@@ -54,7 +55,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
     public void bindPost(Post post, Context context) {
         mPost = post;
         mContext = context;
-        mUser = ParseUser.getCurrentUser();
+        mUser = User.getCurrentUser();
 
         tvUsername.setText(mPost.getUser().getUsername());
         tvDate.setText(mPost.formatDate(mPost.getCreatedAt()));
@@ -70,6 +71,11 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
         GlideApp.with(mContext)
                 .load(mPost.getImage().getUrl())
                 .into(ivPost);
+
+        GlideApp.with(mContext)
+                .load(mUser.getProfileUrl())
+                .transform(new CircleCrop())
+                .into(ivProfile);
 
         mRoot.setOnClickListener(v -> {
             Intent i = new Intent(mContext, CommentActivity.class);

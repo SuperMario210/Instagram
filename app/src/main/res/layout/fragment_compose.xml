@@ -57,6 +57,20 @@
         app:layout_constraintStart_toStartOf="@+id/iv_shade"
         app:layout_constraintTop_toBottomOf="@+id/space" />
 
+    <ImageView
+        android:id="@+id/iv_gallery"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:alpha="0.9"
+        android:src="@drawable/ic_gallery"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_shutter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/iv_shutter"
+        app:layout_constraintTop_toTopOf="@+id/iv_shutter"
+        app:srcCompat="@drawable/ic_gallery" />
+
     <com.google.android.material.circularreveal.CircularRevealFrameLayout
         android:id="@+id/fl_options"
         android:layout_width="0dp"
@@ -93,6 +107,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.circularreveal.CircularRevealFrameLayout>

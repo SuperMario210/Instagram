@@ -45,33 +45,28 @@ public class PostData {
 
     /**
      * Adds a post to the data holder
+     * @param index the index at which to store the post
      * @param post the post to store
-     * @return the index of the post in descending order
+     * @return the index of the post
      */
-//    public int addPost(Post post) {
-//        mPosts.put(post.getObjectId(), post);
-//        for(int i = 0; i < mIds.size(); i++) {
-//            if(post.uid > mIds.get(i)) {
-//                mIds.add(i, post.uid);
-//                return i;
-//            } else if(post.uid == mIds.get(i)) {
-//                return i;
-//            }
-//        }
-//        mIds.add(post.uid);
-//        return mIds.size() - 1;
-//    }
-
     public int addPost(int index, Post post) {
         mPosts.put(post.getObjectId(), post);
         mIds.add(index, post.getObjectId());
         return index;
     }
 
+    /**
+     * Adds a post to the end of the data holder
+     * @param post the post to store
+     * @return the index of the post
+     */
     public int addPost(Post post) {
         return addPost(mIds.size(), post);
     }
 
+    /**
+     * @return the date of the oldest post currently stored
+     */
     public Date getOldestDate() {
         if(mIds.isEmpty())
             return new Date();

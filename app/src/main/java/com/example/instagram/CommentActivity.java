@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,11 +14,13 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.instagram.adapters.CommentAdapter;
 import com.example.instagram.models.Comment;
+import com.example.instagram.models.GlideApp;
 import com.example.instagram.models.Post;
+import com.example.instagram.models.User;
 import com.parse.ParseException;
-import com.parse.ParseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,10 +31,11 @@ import butterknife.ButterKnife;
 public class CommentActivity extends AppCompatActivity {
     private CommentAdapter mCommentAdapter;
     private List<Comment> mComments;
-    private ParseUser mUser;
+    private User mUser;
     private Post mPost;
     private Comment mComment;
 
+    @BindView(R.id.iv_profile) ImageView ivProfile;
     @BindView(R.id.rv_comments) RecyclerView rvComments;
     @BindView(R.id.et_comment) EditText etComment;
     @BindView(R.id.toolbar) Toolbar toolbar;
@@ -44,7 +48,7 @@ public class CommentActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         // Setup the recycler view adapter
-        mUser = ParseUser.getCurrentUser();
+        mUser = User.getCurrentUser();
         mComments = new ArrayList<>();
         mCommentAdapter = new CommentAdapter(mComments, this);
         rvComments.setAdapter(mCommentAdapter);
@@ -54,6 +58,11 @@ public class CommentActivity extends AppCompatActivity {
         rvComments.setLayoutManager(linearLayoutManager);
 
         toolbar.setNavigationOnClickListener(v -> finish());
+
+        GlideApp.with(this)
+                .load(mUser.getProfileUrl())
+                .transform(new CircleCrop())
+                .into(ivProfile);
 
         String postId = getIntent().getStringExtra("postId");
         mPost = ((ParseApp) getApplication()).getPosts().getPostById(postId);

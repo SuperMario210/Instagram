@@ -18,17 +18,18 @@ public class SpaceItemDecoration extends RecyclerView.ItemDecoration {
     public void getItemOffsets(Rect outRect, View view,
                                RecyclerView parent, RecyclerView.State state) {
 
-        int index = parent.getChildLayoutPosition(view);
+        int index = parent.getChildAdapterPosition(view) - 1;
+
         if (index < mColumns) {
             outRect.top = 0;
         } else {
             outRect.top = mSpace;
         }
 
-        if (parent.getChildLayoutPosition(view) % mColumns == 0) {
+        if (index % mColumns == 0) {
             outRect.left = 0;
             outRect.right = mSpace * 2 / 3;
-        } else if(parent.getChildLayoutPosition(view) % mColumns == mColumns - 1) {
+        } else if(index % mColumns == mColumns - 1) {
             outRect.left = mSpace * 2 / 3;
             outRect.right = 0;
         } else {

@@ -87,15 +87,15 @@ public class Post extends ParseObject {
         return users;
     }
 
-    public void addFavorite(ParseUser user) {
-        addAllUnique(KEY_FAVORITES, java.util.Collections.singleton(user));
+    public void addFavorite(User user) {
+        addAllUnique(KEY_FAVORITES, java.util.Collections.singleton(user.getParseUser()));
     }
 
-    public void removeFavorite(ParseUser user) {
-        removeAll(KEY_FAVORITES, java.util.Collections.singleton(user));
+    public void removeFavorite(User user) {
+        removeAll(KEY_FAVORITES, java.util.Collections.singleton(user.getParseUser()));
     }
 
-    public boolean isLikedByUser(ParseUser user) {
+    public boolean isLikedByUser(User user) {
         List<ParseUser> users = getFavorites();
         for(ParseUser u : users)
             if(u.getObjectId().equals(user.getObjectId())) return true;

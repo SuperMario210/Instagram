@@ -14,8 +14,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.instagram.R;
 import com.example.instagram.models.Comment;
+import com.example.instagram.models.GlideApp;
+import com.example.instagram.models.User;
 
 import java.util.List;
 
@@ -77,6 +80,12 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
                     0, mComment.getUser().getUsername().length(),
                     Spanned.SPAN_INCLUSIVE_INCLUSIVE);
             tvComment.setText(builder);
+
+            User user = new User(comment.getUser());
+            GlideApp.with(mContext)
+                    .load(user.getProfileUrl())
+                    .transform(new CircleCrop())
+                    .into(ivProfile);
         }
     }
 }

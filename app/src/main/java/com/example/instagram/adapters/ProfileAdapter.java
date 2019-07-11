@@ -1,6 +1,8 @@
 package com.example.instagram.adapters;
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,11 +13,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.instagram.R;
 import com.example.instagram.callbacks.VoidCallback;
 import com.example.instagram.models.GlideApp;
 import com.example.instagram.models.Post;
-import com.parse.ParseUser;
+import com.example.instagram.models.User;
+
+import net.alhazmy13.mediapicker.Image.ImagePicker;
 
 import java.util.List;
 import java.util.Locale;
@@ -28,11 +33,12 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public static final int NORMAL_ITEM = 1;
 
     private List<Post> mPosts;
-    private ParseUser mUser;
+    private User mUser;
     private Context mContext;
     private VoidCallback mCallback;
+    private ProfileViewHolder mProfileHolder;
 
-    public ProfileAdapter(List<Post> posts, Context context, ParseUser user, VoidCallback logOutCallback) {
+    public ProfileAdapter(List<Post> posts, Context context, User user, VoidCallback logOutCallback) {
         mPosts = posts;
         mContext = context;
         mUser = user;
@@ -43,6 +49,10 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public void clear() {
         mPosts.clear();
         notifyDataSetChanged();
+    }
+
+    public void setProfileImage(Bitmap bitmap) {
+        mProfileHolder.setProfileImage(bitmap);
     }
 
     @Override
@@ -59,7 +69,8 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         if (viewType == FIRST_ITEM) {
             gridView = inflater.inflate(R.layout.item_profile, parent, false);
-            return new ProfileViewHolder(gridView);
+            mProfileHolder = new ProfileViewHolder(gridView);
+            return mProfileHolder;
         } else {
             gridView = inflater.inflate(R.layout.item_post_grid, parent, false);
             return new PostGridViewHolder(gridView);
@@ -69,7 +80,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, int position) {
         if(holder.getItemViewType() == FIRST_ITEM) {
-            ((ProfileViewHolder) holder).bindUser(mUser, mContext);
+            mProfileHolder.bindUser(mUser, mContext);
         } else {
             Post post = mPosts.get(position - 1);
             ((PostGridViewHolder) holder).bindPost(post, mContext);
@@ -104,7 +115,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     public class ProfileViewHolder extends RecyclerView.ViewHolder {
         private Context mContext;
-        private ParseUser mUser;
+        private User mUser;
 
         @BindView(R.id.iv_profile) ImageView ivProfile;
         @BindView(R.id.tv_username) TextView tvUsername;
@@ -119,19 +130,35 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ButterKnife.bind(this, view);
         }
 
-        public void bindUser(ParseUser user, Context context) {
+        public void bindUser(User user, Context context) {
             mUser = user;
             mContext = context;
 
             tvUsername.setText(mUser.getUsername());
             tvPosts.setText(String.format(Locale.getDefault(), "%d", mPosts.size()));
 
-            btnLogout.setOnClickListener(v -> {
-                mCallback.done(null);
-            });
-//            GlideApp.with(mContext)
-//                    .load(mPost.getImage().getUrl())
-//                    .into(ivPost);
+            btnLogout.setOnClickListener(v -> mCallback.done(null));
+
+            ivProfile.setOnClickListener(v -> new ImagePicker.Builder((Activity) mContext)
+                        .mode(ImagePicker.Mode.CAMERA_AND_GALLERY)
+                        .compressLevel(ImagePicker.ComperesLevel.MEDIUM)
+                        .directory(ImagePicker.Directory.DEFAULT)
+                        .extension(ImagePicker.Extension.PNG)
+                        .scale(600, 600)
+                        .allowMultipleImages(false)
+                        .enableDebuggingMode(true)
+                        .build());
+            GlideApp.with(mContext)
+                    .load(mUser.getProfileUrl())
+                    .transform(new CircleCrop())
+                    .into(ivProfile);
+        }
+
+        public void setProfileImage(Bitmap bitmap) {
+            GlideApp.with(mContext)
+                    .load(bitmap)
+                    .transform(new CircleCrop())
+                    .into(ivProfile);
         }
     }
 }

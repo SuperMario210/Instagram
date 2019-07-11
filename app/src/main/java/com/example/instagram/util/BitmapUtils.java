@@ -1,6 +1,11 @@
 package com.example.instagram.util;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Environment;
+import android.util.Log;
+
+import java.io.File;
 
 public class BitmapUtils
 {
@@ -42,6 +47,28 @@ public class BitmapUtils
         } else {
             return Bitmap.createBitmap(b, 0, 0, b.getHeight() * width / height, b.getHeight());
         }
+    }
+
+    /**
+     * Returns the File for a photo stored on disk given the fileName
+     * @param fileName the filename of the file to store the photo in
+     * @return a file to store the photo in
+     */
+    public static File getPhotoFileUri(String fileName, Context context) {
+        // Get safe storage directory for photos
+        // Use `getExternalFilesDir` on Context to access package-specific directories.
+        // This way, we don't need to request external read/write runtime permissions.
+        File mediaStorageDir = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "fbu_instagram");
+
+        // Create the storage directory if it does not exist
+        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()){
+            Log.d("BitmapUtils", "failed to create directory");
+        }
+
+        // Return the file target for the photo based on filename
+        File file = new File(mediaStorageDir.getPath() + File.separator + fileName);
+
+        return file;
     }
 
 }

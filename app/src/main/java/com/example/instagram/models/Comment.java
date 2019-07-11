@@ -12,9 +12,9 @@ public class Comment extends ParseObject {
     private static final String KEY_POST = "post";
     private static final String KEY_TEXT = "text";
 
-    public static Comment createComment(ParseUser user, Post post, String text, final SaveCallback callback) {
+    public static Comment createComment(User user, Post post, String text, final SaveCallback callback) {
         final Comment newComment = new Comment();
-        newComment.setUser(user);
+        newComment.setUser(user.getParseUser());
         newComment.setPost(post);
         newComment.setText(text);
         newComment.saveInBackground(callback);

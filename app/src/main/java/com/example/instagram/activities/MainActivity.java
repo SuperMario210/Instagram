@@ -1,17 +1,21 @@
 package com.example.instagram.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.example.instagram.ParseApp;
 import com.example.instagram.R;
 import com.example.instagram.fragments.ComposeFragment;
 import com.example.instagram.fragments.HomeFragment;
 import com.example.instagram.fragments.ProfileFragment;
+import com.example.instagram.models.Post;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import butterknife.BindView;
@@ -85,6 +89,19 @@ public class MainActivity extends AppCompatActivity implements ComposeFragment.O
     public void onFragmentClosed() {
         mFragmentManager.beginTransaction().replace(R.id.fl_container, mHomeFragment).commit();
         bnMenu.setSelectedItemId(R.id.action_home);
+    }
+
+    @Override
+    public void onPostSubmitted(Post post) {
+        ((ParseApp) getApplication()).getPosts().addPost(0, post);
+        mFragmentManager.beginTransaction().replace(R.id.fl_container, mHomeFragment).commit();
+        bnMenu.setSelectedItemId(R.id.action_home);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        mCurrentFragment.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
