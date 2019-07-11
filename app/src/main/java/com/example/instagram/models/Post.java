@@ -13,7 +13,9 @@ import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 @ParseClassName("Post")
@@ -21,7 +23,7 @@ public class Post extends ParseObject {
     private static final String KEY_DESCRIPTION = "description";
     private static final String KEY_IMAGE = "image";
     private static final String KEY_USER = "user";
-    private static final String KEY_CREATED_AT = "createdAt";
+    private static final String KEY_FAVORITES = "favorites";
 
     public static Post createPost(String description, ParseFile image,
                                   User user, final SaveCallback callback) {
@@ -78,10 +80,43 @@ public class Post extends ParseObject {
         put(KEY_USER, user);
     }
 
+    public List<ParseUser> getFavorites() {
+        List<ParseUser> users = getList(KEY_FAVORITES);
+        if(users == null)
+            return new ArrayList<>();
+        return users;
+    }
+
+    public void addFavorite(ParseUser user) {
+        addAllUnique(KEY_FAVORITES, java.util.Collections.singleton(user));
+    }
+
+    public void removeFavorite(ParseUser user) {
+        removeAll(KEY_FAVORITES, java.util.Collections.singleton(user));
+    }
+
+    public boolean isLikedByUser(ParseUser user) {
+        List<ParseUser> users = getFavorites();
+        for(ParseUser u : users)
+            if(u.getObjectId().equals(user.getObjectId())) return true;
+        return false;
+    }
+
+    public int getNumFavorites() {
+        return getFavorites().size();
+    }
+
+    public String getNumFavoritesString() {
+        int numFaves = getNumFavorites();
+        if(numFaves == 1)
+            return String.format(Locale.getDefault(), "%d like", numFaves);
+        return String.format(Locale.getDefault(), "%d likes", numFaves);
+    }
+
     public static String formatDate(Date date) {
-        String timeFormat = (date.getYear() != new Date().getYear()) ? "MMM dd yyyy" : "MMM dd";
+        String timeFormat = (date.getYear() != new Date().getYear()) ? "MMM dd yyyy, h:mma" : "MMM dd, h:mma";
         SimpleDateFormat sdf = new SimpleDateFormat(timeFormat, Locale.ENGLISH);
-        return sdf.format(date);
+        return sdf.format(date).replace("AM", "am").replace("PM", "pm");
     }
 
     public static class Query extends ParseQuery<Post> {
@@ -96,6 +131,11 @@ public class Post extends ParseObject {
 
         public Query withUser() {
             include("user");
+            return this;
+        }
+
+        public Query withFavorites() {
+            include("favorites");
             return this;
         }
     }

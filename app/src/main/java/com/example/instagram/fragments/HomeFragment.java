@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.instagram.R;
 import com.example.instagram.adapters.PostAdapter;
@@ -31,6 +32,7 @@ public class HomeFragment extends Fragment {
     private List<Post> mPosts;
 
     @BindView(R.id.rv_posts) RecyclerView rvPosts;
+    @BindView(R.id.swipe_container) SwipeRefreshLayout swipeContainer;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,9 +59,18 @@ public class HomeFragment extends Fragment {
 
         // Setup the recycler view layout manager
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
-        linearLayoutManager.setReverseLayout(true);
-        linearLayoutManager.setStackFromEnd(true);
         rvPosts.setLayoutManager(linearLayoutManager);
+
+        // Setup the swipe container
+        swipeContainer.setOnRefreshListener(() -> {
+            getPosts();
+        });
+        // Configure the refreshing colors
+        swipeContainer.setColorSchemeResources(
+                R.color.red_5,
+                R.color.green_5,
+                R.color.blue_5,
+                R.color.purple_5);
 
         getPosts();
     }
@@ -69,13 +80,14 @@ public class HomeFragment extends Fragment {
         mUnbinder.unbind();
     }
 
-    public void getPosts() {
-        final Post.Query query = new Post.Query().getTop().withUser();
-        query.findInBackground((List<Post> posts, ParseException e) -> {
+    private void getPosts() {
+        final Post.Query query = new Post.Query().getTop().withUser().withFavorites();
+        query.orderByDescending("createdAt").findInBackground((List<Post> posts, ParseException e) -> {
             if(e == null) {
                 mPosts.clear();
                 mPosts.addAll(posts);
                 mPostAdapter.notifyDataSetChanged();
+                swipeContainer.setRefreshing(false);
             } else {
                 Log.e("MainActivity", "Couldn't load posts", e);
             }

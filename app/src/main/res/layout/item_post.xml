@@ -12,9 +12,9 @@
         android:id="@+id/iv_profile"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginTop="12dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/avatar" />
@@ -39,6 +39,7 @@
         android:layout_height="wrap_content"
         android:text="June 15"
         android:textColor="@color/black_80_transparent"
+        android:textSize="14sp"
         app:layout_constraintStart_toStartOf="@+id/tv_username"
         app:layout_constraintTop_toBottomOf="@+id/tv_username" />
 
@@ -46,7 +47,7 @@
         android:id="@+id/iv_post"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
         app:layout_constraintTop_toBottomOf="@+id/iv_profile"
@@ -100,12 +101,28 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
-        android:layout_marginTop="12dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc justo diam, tempor sit amet rutrum sit amet, accumsan elementum quam. Integer euismod nisl nec faucibus luctus"
         android:textColor="@color/black_80_transparent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_favorites" />
+
+    <TextView
+        android:id="@+id/tv_favorites"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:text="0 likes"
+        android:textColor="@color/black_80_transparent"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/iv_favorite" />
 </androidx.constraintlayout.widget.ConstraintLayout>

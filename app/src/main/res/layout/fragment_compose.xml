@@ -114,27 +114,63 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
+        android:minHeight="56dp"
         android:paddingRight="24dp"
         android:theme="?attr/actionBarTheme"
         app:contentInsetStartWithNavigation="48dp"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_vector_close"
-        app:title="New Post"
         app:titleMargin="0dp"
-        app:titleTextAppearance="@style/ToolbarText"
         tools:layout_editor_absoluteX="0dp">
 
-        <TextView
-            android:id="@+id/tv_share"
-            android:layout_width="wrap_content"
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:gravity="right"
-            android:text="Share"
-            android:textColor="@color/blue_6"
-            android:textSize="16dp"
-            tools:layout_editor_absoluteX="125dp"
-            tools:layout_editor_absoluteY="18dp" />
+            android:foregroundGravity="right"
+            tools:layout_editor_absoluteX="133dp"
+            tools:layout_editor_absoluteY="17dp">
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:gravity="right"
+                android:text="New Post"
+                android:textAppearance="@style/ToolbarText"
+                android:textSize="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ProgressBar
+                android:id="@+id/pb_loading"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:foregroundGravity="right"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/tv_share"
+                app:layout_constraintStart_toStartOf="@+id/tv_share"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_share"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:gravity="right"
+                android:text="Share"
+                android:textColor="@color/blue_6"
+                android:textSize="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.appcompat.widget.Toolbar>
 
 

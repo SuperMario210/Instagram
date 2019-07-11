@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -80,6 +81,7 @@ public class ComposeFragment extends Fragment {
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.tv_share) TextView tvShare;
     @BindView(R.id.et_caption) EditText etCaption;
+    @BindView(R.id.pb_loading) ProgressBar pbLoading;
 
     /**
      * This enum holds the different states that the compose fragment can be in (taking a picture,
@@ -129,17 +131,13 @@ public class ComposeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if(mCurrentState == ComposeState.PICTURE && mPreview != null)
-            mPreview.setOnPreviewOutputUpdateListener(mPreviewListener);
     }
     @Override
     public void onPause() {
-        mPreview.removePreviewOutputListener();
         super.onPause();
     }
     @Override
     public void onStop() {
-        mPreview.removePreviewOutputListener();
         super.onStop();
     }
 
@@ -196,7 +194,7 @@ public class ComposeFragment extends Fragment {
 
         // Create a preview listener to update the viewfinder
         mPreviewListener = (output) -> {
-            ViewGroup parent = (ViewGroup) mCameraView.getParent(); //TODO TRY REMOVE THIS
+            ViewGroup parent = (ViewGroup) mCameraView.getParent();
             parent.removeView(mCameraView);
             parent.addView(mCameraView, 0);
 
@@ -229,7 +227,9 @@ public class ComposeFragment extends Fragment {
             // todo: return to previous fragment
         });
         toolbar.setNavigationIcon(R.drawable.ic_vector_close);
-        tvShare.setVisibility(View.GONE);
+        tvShare.setOnClickListener(null);
+        tvShare.setVisibility(View.INVISIBLE);
+        pbLoading.setVisibility(View.GONE);
 
         // Set up the shutter
         flOptions.setVisibility(View.INVISIBLE);
@@ -246,7 +246,6 @@ public class ComposeFragment extends Fragment {
                 @Override
                 public void onImageSaved(@NonNull File file) {
                     Toast.makeText(getContext(), "Image saved sucessfully", Toast.LENGTH_SHORT).show();
-                    mPreview.removePreviewOutputListener();
                     handleImageCapture(file);
                 }
 
@@ -258,9 +257,6 @@ public class ComposeFragment extends Fragment {
 
             switchToCaptionView();
         });
-
-        // Start the camera
-        if(mPreview != null) mPreview.setOnPreviewOutputUpdateListener(mPreviewListener);
     }
 
     /**
@@ -340,7 +336,11 @@ public class ComposeFragment extends Fragment {
         ivPreview.setVisibility(View.VISIBLE);
         ivPreview.setImageBitmap(mBitmap);
 
-        tvShare.setOnClickListener(v -> submitPost());
+        tvShare.setOnClickListener(v -> {
+            tvShare.setVisibility(View.INVISIBLE);
+            pbLoading.setVisibility(View.VISIBLE);
+            submitPost();
+        });
     }
 
     /**
@@ -375,12 +375,12 @@ public class ComposeFragment extends Fragment {
             ParseFile image = new ParseFile(imageFile);
             String caption = etCaption.getText().toString();
 
-            // todo show some sort of loading indicator
             // Create the post
             Post.createPost(caption, image, User.getCurrentUser(), (ParseException e) -> {
                 if(e == null) {
                     Toast.makeText(getContext(), "Post shared successfully", Toast.LENGTH_SHORT).show();
-                    // todo: switch to home activity
+                    etCaption.setText("");
+                    mClosedListener.onFragmentClosed();
                 } else {
                     Log.e("ComposeFragment", "Could not save post", e);
                     Toast.makeText(getContext(), "Couldn't share post!", Toast.LENGTH_LONG);
