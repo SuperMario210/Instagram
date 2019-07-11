@@ -18,6 +18,7 @@ import com.example.instagram.R;
 import com.example.instagram.adapters.PostAdapter;
 import com.example.instagram.models.Post;
 import com.example.instagram.models.PostData;
+import com.example.instagram.util.EndlessRecyclerViewScrollListener;
 import com.parse.ParseException;
 
 import java.util.List;
@@ -31,6 +32,7 @@ public class HomeFragment extends Fragment {
     private Unbinder mUnbinder;
     private PostAdapter mPostAdapter;
     private PostData mPosts;
+    private EndlessRecyclerViewScrollListener mScrollListener;
 
     @BindView(R.id.rv_posts) RecyclerView rvPosts;
     @BindView(R.id.swipe_container) SwipeRefreshLayout swipeContainer;
@@ -61,8 +63,19 @@ public class HomeFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         rvPosts.setLayoutManager(linearLayoutManager);
 
+        // Setup the scroll listener for infinite pagination
+        mScrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                // Load more posts to the timeline
+                getPosts();
+            }
+        };
+        rvPosts.addOnScrollListener(mScrollListener);
+
         // Setup the swipe container
         swipeContainer.setOnRefreshListener(() -> {
+            mPosts.clearData();
             getPosts();
         });
         // Configure the refreshing colors
@@ -81,8 +94,12 @@ public class HomeFragment extends Fragment {
     }
 
     private void getPosts() {
-        final Post.Query query = new Post.Query().getTop().withUser().withFavorites();
-        query.orderByDescending("createdAt").findInBackground((List<Post> posts, ParseException e) -> {
+        final Post.Query query = new Post.Query()
+                .getTop()
+                .withUser()
+                .withFavorites()
+                .olderThan(mPosts.getOldestDate());
+        query.findInBackground((List<Post> posts, ParseException e) -> {
             if(e == null) {
                 for(Post post : posts) {
                     mPostAdapter.notifyItemInserted(mPosts.addPost(post));

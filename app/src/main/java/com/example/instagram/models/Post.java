@@ -122,6 +122,7 @@ public class Post extends ParseObject {
     public static class Query extends ParseQuery<Post> {
         public Query() {
             super(Post.class);
+            orderByDescending("createdAt");
         }
 
         public Query getTop() {
@@ -141,6 +142,11 @@ public class Post extends ParseObject {
 
         public Query withFavorites() {
             include("favorites");
+            return this;
+        }
+
+        public Query olderThan(Date date) {
+            whereLessThan("createdAt", date);
             return this;
         }
     }

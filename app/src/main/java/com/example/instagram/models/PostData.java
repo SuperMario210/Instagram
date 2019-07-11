@@ -1,6 +1,7 @@
 package com.example.instagram.models;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +70,12 @@ public class PostData {
 
     public int addPost(Post post) {
         return addPost(mIds.size(), post);
+    }
+
+    public Date getOldestDate() {
+        if(mIds.isEmpty())
+            return new Date();
+        return mPosts.get(mIds.get(mIds.size() - 1)).getCreatedAt();
     }
 
     /**
