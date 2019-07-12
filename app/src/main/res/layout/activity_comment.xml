@@ -28,13 +28,75 @@
         android:background="@drawable/top_shadow"
         app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
+
+    <ImageView
+        android:id="@+id/iv_outline"
+        android:layout_width="43dp"
+        android:layout_height="43dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_profile"
+        app:layout_constraintEnd_toEndOf="@+id/iv_profile"
+        app:layout_constraintStart_toStartOf="@+id/iv_profile"
+        app:layout_constraintTop_toTopOf="@+id/iv_profile"
+        app:srcCompat="@drawable/background" />
+
+    <ImageView
+        android:id="@+id/iv_border"
+        android:layout_width="39dp"
+        android:layout_height="39dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_profile"
+        app:layout_constraintEnd_toEndOf="@+id/iv_profile"
+        app:layout_constraintStart_toStartOf="@+id/iv_profile"
+        app:layout_constraintTop_toTopOf="@+id/iv_profile"
+        app:srcCompat="@color/white" />
+
+    <ImageView
+        android:id="@+id/iv_profile"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        app:srcCompat="@drawable/avatar" />
+
+    <TextView
+        android:id="@+id/tv_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="8dp"
+        android:background="@null"
+        android:text="Comment here"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/iv_outline"
+        app:layout_constraintTop_toTopOf="@+id/iv_border" />
+
+    <TextView
+        android:id="@+id/tv_timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="22m"
+        android:textColor="@color/black_40_transparent"
+        android:textSize="12sp"
+        app:layout_constrainedWidth="false"
+        app:layout_constraintStart_toStartOf="@+id/tv_description"
+        app:layout_constraintTop_toBottomOf="@+id/tv_description" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_comments"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/bottom_border"
         app:layout_constraintBottom_toTopOf="@+id/et_comment"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        app:layout_constraintTop_toBottomOf="@+id/tv_timestamp"
         tools:layout_editor_absoluteX="8dp" />
 
     <TextView
@@ -71,10 +133,10 @@
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/tv_share"
-        app:layout_constraintStart_toEndOf="@+id/iv_profile" />
+        app:layout_constraintStart_toEndOf="@+id/iv_outline" />
 
     <ImageView
-        android:id="@+id/iv_profile"
+        android:id="@+id/iv_profile_comment"
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:layout_marginStart="12dp"

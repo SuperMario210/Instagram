@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.instagram.CommentActivity;
 import com.example.instagram.R;
+import com.example.instagram.callbacks.UserCallback;
 import com.example.instagram.models.GlideApp;
 import com.example.instagram.models.Post;
 import com.example.instagram.models.User;
@@ -32,9 +33,10 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
     private User mUser;
     private Context mContext;
     private Post mPost;
+    private UserCallback mCallback;
     private View mRoot;
 
-    @BindView(R.id.iv_profile) ImageView ivProfile;
+    @BindView(R.id.iv_outline) ImageView ivProfile;
     @BindView(R.id.iv_post) ImageView ivPost;
     @BindView(R.id.iv_favorite) ImageView ivFavorite;
     @BindView(R.id.iv_comment) ImageView ivComment;
@@ -52,30 +54,26 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
         ButterKnife.bind(this, view);
     }
 
-    public void bindPost(Post post, Context context) {
+    public void bindPost(Post post, Context context, UserCallback callback) {
         mPost = post;
         mContext = context;
-        mUser = User.getCurrentUser();
+        mUser = post.getUser();
+        mCallback = callback;
 
-        tvUsername.setText(mPost.getUser().getUsername());
-        tvDate.setText(mPost.formatDate(mPost.getCreatedAt()));
-
-        String caption = mPost.getUser().getUsername() + " " + mPost.getDescription();
-        SpannableStringBuilder builder = new SpannableStringBuilder(caption);
-        builder.setSpan(new StyleSpan(Typeface.BOLD),
-                0, mPost.getUser().getUsername().length(),
-                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-
-        tvCaption.setText(builder);
+        if(mPost.getDescription().isEmpty()) {
+            tvCaption.setVisibility(View.GONE);
+        } else {
+            String caption = mPost.getUser().getUsername() + " " + mPost.getDescription();
+            SpannableStringBuilder builder = new SpannableStringBuilder(caption);
+            builder.setSpan(new StyleSpan(Typeface.BOLD),
+                    0, mPost.getUser().getUsername().length(),
+                    Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+            tvCaption.setText(builder);
+        }
 
         GlideApp.with(mContext)
                 .load(mPost.getImage().getUrl())
                 .into(ivPost);
-
-        GlideApp.with(mContext)
-                .load(mUser.getProfileUrl())
-                .transform(new CircleCrop())
-                .into(ivProfile);
 
         mRoot.setOnClickListener(v -> {
             Intent i = new Intent(mContext, CommentActivity.class);
@@ -84,6 +82,21 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
         });
 
         initFavoriteIcon();
+        initUserInfo();
+    }
+
+    private void initUserInfo() {
+        GlideApp.with(mContext)
+                .load(mUser.getProfileUrl())
+                .transform(new CircleCrop())
+                .into(ivProfile);
+
+        tvUsername.setText(mPost.getUser().getUsername());
+        tvDate.setText(mPost.formatDate(mPost.getCreatedAt()));
+
+        View.OnClickListener listener = v -> mCallback.done(mUser);
+        tvUsername.setOnClickListener(listener);
+        ivProfile.setOnClickListener(listener);
     }
 
     private void initFavoriteIcon() {
@@ -97,22 +110,23 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
 
         tvFavorites.setText(mPost.getNumFavoritesString());
 
-        if(!mPost.isLikedByUser(mUser)) {
+        User currentUser = User.getCurrentUser();
+        if(!mPost.isLikedByUser(currentUser)) {
             ivFavorite.setImageDrawable(icon);
         } else {
             ivFavorite.setImageDrawable(active_icon);
         }
 
         ivFavorite.setOnClickListener(v -> {
-            if(!mPost.isLikedByUser(mUser)) {
-                mPost.addFavorite(mUser);
+            if(!mPost.isLikedByUser(currentUser)) {
+                mPost.addFavorite(currentUser);
                 mPost.saveInBackground(e -> {
                     tvFavorites.setText(mPost.getNumFavoritesString());
                     ivFavorite.setImageDrawable(active_icon);
                     ivFavorite.startAnimation(bounceAnim);
                 });
             } else {
-                mPost.removeFavorite(mUser);
+                mPost.removeFavorite(currentUser);
                 mPost.saveInBackground(e -> {
                     tvFavorites.setText(mPost.getNumFavoritesString());
                     ivFavorite.setImageDrawable(icon);

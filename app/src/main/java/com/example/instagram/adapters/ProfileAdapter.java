@@ -3,6 +3,7 @@ package com.example.instagram.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,12 +38,15 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private Context mContext;
     private VoidCallback mCallback;
     private ProfileViewHolder mProfileHolder;
+    private boolean mIsCurrentUser;
 
-    public ProfileAdapter(List<Post> posts, Context context, User user, VoidCallback logOutCallback) {
+    public ProfileAdapter(List<Post> posts, Context context, User user, boolean isCurrentUser,
+                          VoidCallback logOutCallback) {
         mPosts = posts;
         mContext = context;
         mUser = user;
         mCallback = logOutCallback;
+        mIsCurrentUser = isCurrentUser;
     }
 
     // Clean all elements of the recycler
@@ -118,6 +122,8 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         private User mUser;
 
         @BindView(R.id.iv_profile) ImageView ivProfile;
+        @BindView(R.id.iv_outline) ImageView ivOutline;
+        @BindView(R.id.iv_border) ImageView ivBorder;
         @BindView(R.id.tv_username) TextView tvUsername;
         @BindView(R.id.tv_bio) TextView tvBio;
         @BindView(R.id.tv_posts) TextView tvPosts;
@@ -137,9 +143,17 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             tvUsername.setText(mUser.getUsername());
             tvPosts.setText(String.format(Locale.getDefault(), "%d", mPosts.size()));
 
-            btnLogout.setOnClickListener(v -> mCallback.done(null));
-
-            ivProfile.setOnClickListener(v -> new ImagePicker.Builder((Activity) mContext)
+            if(!mIsCurrentUser) {
+                btnLogout.setVisibility(View.GONE);
+                ivProfile.setVisibility(View.GONE);
+                ivBorder.setVisibility(View.GONE);
+                GlideApp.with(mContext)
+                        .load(mUser.getProfileUrl())
+                        .transform(new CircleCrop())
+                        .into(ivOutline);
+            } else {
+                btnLogout.setOnClickListener(v -> mCallback.done(null));
+                ivProfile.setOnClickListener(v -> new ImagePicker.Builder((Activity) mContext)
                         .mode(ImagePicker.Mode.CAMERA_AND_GALLERY)
                         .compressLevel(ImagePicker.ComperesLevel.MEDIUM)
                         .directory(ImagePicker.Directory.DEFAULT)
@@ -148,10 +162,22 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         .allowMultipleImages(false)
                         .enableDebuggingMode(true)
                         .build());
-            GlideApp.with(mContext)
-                    .load(mUser.getProfileUrl())
-                    .transform(new CircleCrop())
-                    .into(ivProfile);
+
+                GlideApp.with(mContext)
+                        .load(R.drawable.background)
+                        .transform(new CircleCrop())
+                        .into(ivOutline);
+
+                GlideApp.with(mContext)
+                        .load(new ColorDrawable(mContext.getResources().getColor(R.color.white)))
+                        .transform(new CircleCrop())
+                        .into(ivBorder);
+
+                GlideApp.with(mContext)
+                        .load(mUser.getProfileUrl())
+                        .transform(new CircleCrop())
+                        .into(ivProfile);
+            }
         }
 
         public void setProfileImage(Bitmap bitmap) {

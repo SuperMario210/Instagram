@@ -9,16 +9,19 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.instagram.R;
+import com.example.instagram.callbacks.UserCallback;
 import com.example.instagram.models.Post;
 import com.example.instagram.models.PostData;
 
 public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
     private PostData mPosts;
     private Context mContext;
+    private UserCallback mCallback;
 
-    public PostAdapter(PostData posts, Context context) {
+    public PostAdapter(PostData posts, Context context, UserCallback callback) {
         mPosts = posts;
         mContext = context;
+        mCallback = callback;
     }
 
     // Clean all elements of the recycler
@@ -40,7 +43,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull final PostViewHolder holder, int position) {
         Post post = mPosts.getPostByIndex(position);
-        holder.bindPost(post, mContext);
+        holder.bindPost(post, mContext, mCallback);
     }
 
     @Override

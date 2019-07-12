@@ -1,5 +1,6 @@
 package com.example.instagram.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,6 +19,7 @@ import com.example.instagram.R;
 import com.example.instagram.adapters.PostAdapter;
 import com.example.instagram.models.Post;
 import com.example.instagram.models.PostData;
+import com.example.instagram.models.User;
 import com.example.instagram.util.EndlessRecyclerViewScrollListener;
 import com.parse.ParseException;
 
@@ -33,6 +35,7 @@ public class HomeFragment extends Fragment {
     private PostAdapter mPostAdapter;
     private PostData mPosts;
     private EndlessRecyclerViewScrollListener mScrollListener;
+    private OnProfileOpenedListener mListener;
 
     @BindView(R.id.rv_posts) RecyclerView rvPosts;
     @BindView(R.id.swipe_container) SwipeRefreshLayout swipeContainer;
@@ -56,7 +59,7 @@ public class HomeFragment extends Fragment {
 
         // Setup the recycler view adapter
         mPosts = ((ParseApp) getContext().getApplicationContext()).getPosts();
-        mPostAdapter = new PostAdapter(mPosts, getContext());
+        mPostAdapter = new PostAdapter(mPosts, getContext(), user -> mListener.onProfileOpened(user));
         rvPosts.setAdapter(mPostAdapter);
 
         // Setup the recycler view layout manager
@@ -109,5 +112,26 @@ public class HomeFragment extends Fragment {
                 Log.e("MainActivity", "Couldn't load posts", e);
             }
         });
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnProfileOpenedListener) {
+            mListener = (OnProfileOpenedListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+    public interface OnProfileOpenedListener {
+        void onProfileOpened(User user);
     }
 }

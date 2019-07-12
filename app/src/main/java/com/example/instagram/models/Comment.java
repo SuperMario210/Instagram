@@ -1,5 +1,11 @@
 package com.example.instagram.models;
 
+import android.graphics.Typeface;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.StyleSpan;
+
+import com.example.instagram.util.DateFormatter;
 import com.parse.ParseClassName;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -21,8 +27,22 @@ public class Comment extends ParseObject {
 
         return newComment;
     }
-    public ParseUser getUser() {
-        return getParseUser(KEY_USER);
+
+    public User getUser() {
+        return new User(getParseUser(KEY_USER));
+    }
+
+    public SpannableStringBuilder getFormattedText() {
+        String caption = getUser().getUsername() + " " + getText();
+        SpannableStringBuilder builder = new SpannableStringBuilder(caption);
+        builder.setSpan(new StyleSpan(Typeface.BOLD),
+                0, getUser().getUsername().length(),
+                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        return builder;
+    }
+
+    public String getFormattedDate() {
+        return DateFormatter.formatTimestamp(getCreatedAt());
     }
 
     public void setUser(ParseUser user) {

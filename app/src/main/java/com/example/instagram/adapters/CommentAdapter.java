@@ -1,10 +1,6 @@
 package com.example.instagram.adapters;
 
 import android.content.Context;
-import android.graphics.Typeface;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
-import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +14,6 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.instagram.R;
 import com.example.instagram.models.Comment;
 import com.example.instagram.models.GlideApp;
-import com.example.instagram.models.User;
 
 import java.util.List;
 
@@ -62,8 +57,9 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
         private Context mContext;
         private Comment mComment;
 
-        @BindView(R.id.iv_profile) ImageView ivProfile;
-        @BindView(R.id.tv_comment) TextView tvComment;
+        @BindView(R.id.iv_outline) ImageView ivProfile;
+        @BindView(R.id.tv_description) TextView tvComment;
+        @BindView(R.id.tv_timestamp) TextView tvTimestamp;
 
         public CommentViewHolder(@NonNull View view) {
             super(view);
@@ -74,16 +70,11 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
             mComment = comment;
             mContext = context;
 
-            String commentText = mComment.getUser().getUsername() + " " + mComment.getText();
-            SpannableStringBuilder builder = new SpannableStringBuilder(commentText);
-            builder.setSpan(new StyleSpan(Typeface.BOLD),
-                    0, mComment.getUser().getUsername().length(),
-                    Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-            tvComment.setText(builder);
+            tvComment.setText(mComment.getFormattedText());
 
-            User user = new User(comment.getUser());
+            tvTimestamp.setText(mComment.getFormattedDate());
             GlideApp.with(mContext)
-                    .load(user.getProfileUrl())
+                    .load(comment.getUser().getProfileUrl())
                     .transform(new CircleCrop())
                     .into(ivProfile);
         }

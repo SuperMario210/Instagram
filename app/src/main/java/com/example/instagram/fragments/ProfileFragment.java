@@ -1,6 +1,5 @@
 package com.example.instagram.fragments;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -49,12 +48,16 @@ public class ProfileFragment extends Fragment {
 
     private Unbinder mUnbinder;
     private User mUser;
-    private OnFragmentInteractionListener mListener;
     private ProfileAdapter mProfileAdapter;
     private List<Post> mPosts;
+    private boolean mIsCurrentUser;
 
     @BindView(R.id.rv_posts) RecyclerView rvPosts;
 
+    public ProfileFragment(User user, boolean isCurrentUser) {
+        mUser = user;
+        mIsCurrentUser = isCurrentUser;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -62,7 +65,6 @@ public class ProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         mUnbinder = ButterKnife.bind(this, view);
 
-        mUser = User.getCurrentUser();
         return view;
     }
 
@@ -74,11 +76,13 @@ public class ProfileFragment extends Fragment {
 
         // Setup the recycler view adapter
         mPosts = new ArrayList<>();
-        mProfileAdapter = new ProfileAdapter(mPosts, getContext(), mUser, (Void v) -> logOut());
+        mProfileAdapter = new ProfileAdapter(mPosts, getContext(), mUser, mIsCurrentUser,
+                (Void v) -> logOut());
         rvPosts.setAdapter(mProfileAdapter);
 
         // Setup the recycler view layout manager
-        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), COLUMN_COUNT, RecyclerView.VERTICAL, false);
+        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), COLUMN_COUNT,
+                RecyclerView.VERTICAL, false);
         layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
@@ -90,42 +94,14 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-//        GridLayoutManager layoutManager = new GridLayoutManager(getContext(), COLUMN_COUNT);
         rvPosts.setLayoutManager(layoutManager);
 
         rvPosts.addItemDecoration(new SpaceItemDecoration(6, COLUMN_COUNT));
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
     @Override public void onDestroyView() {
         super.onDestroyView();
         mUnbinder.unbind();
-    }
-
-    public void onButtonPressed() {
-        if (mListener != null) {
-            mListener.onFragmentInteraction();
-        }
-    }
-
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction();
     }
 
     private void logOut() {

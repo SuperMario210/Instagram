@@ -77,7 +77,7 @@
             app:srcCompat="@drawable/background" />
 
         <ImageView
-            android:id="@+id/iv_profile"
+            android:id="@+id/iv_outline"
             android:layout_width="140dp"
             android:layout_height="140dp"
             app:layout_constraintBottom_toBottomOf="@+id/iv_border"

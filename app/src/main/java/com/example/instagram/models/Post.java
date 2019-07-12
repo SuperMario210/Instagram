@@ -1,9 +1,14 @@
 package com.example.instagram.models;
 
+import android.graphics.Typeface;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.StyleSpan;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.example.instagram.util.DateFormatter;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -45,6 +50,19 @@ public class Post extends ParseObject {
         return newPost;
     }
 
+    public String getFormattedDate() {
+        return DateFormatter.formatTimestamp(getCreatedAt());
+    }
+
+    public SpannableStringBuilder getFormattedDescription() {
+        String caption = getUser().getUsername() + " " + getDescription();
+        SpannableStringBuilder builder = new SpannableStringBuilder(caption);
+        builder.setSpan(new StyleSpan(Typeface.BOLD),
+                0, getUser().getUsername().length(),
+                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        return builder;
+    }
+
     public String getDescription() {
         return getString(KEY_DESCRIPTION);
     }
@@ -72,8 +90,8 @@ public class Post extends ParseObject {
         });
     }
 
-    public ParseUser getUser() {
-        return getParseUser(KEY_USER);
+    public User getUser() {
+        return new User(getParseUser(KEY_USER));
     }
 
     public void setUser(ParseUser user) {

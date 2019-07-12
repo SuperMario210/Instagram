@@ -1,12 +1,14 @@
 package com.example.instagram;
 
 import android.app.Activity;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,6 +38,10 @@ public class CommentActivity extends AppCompatActivity {
     private Comment mComment;
 
     @BindView(R.id.iv_profile) ImageView ivProfile;
+    @BindView(R.id.iv_outline) ImageView ivOutline;
+    @BindView(R.id.iv_border) ImageView ivBorder;
+    @BindView(R.id.iv_profile_comment) ImageView ivProfileComment;
+    @BindView(R.id.tv_description) TextView tvDescription;
     @BindView(R.id.rv_comments) RecyclerView rvComments;
     @BindView(R.id.et_comment) EditText etComment;
     @BindView(R.id.toolbar) Toolbar toolbar;
@@ -52,20 +58,39 @@ public class CommentActivity extends AppCompatActivity {
         mComments = new ArrayList<>();
         mCommentAdapter = new CommentAdapter(mComments, this);
         rvComments.setAdapter(mCommentAdapter);
+        mPost = ((ParseApp) getApplication()).getPosts().getPostById(
+                getIntent().getStringExtra("postId"));
+
+        tvDescription.setText(mPost.getFormattedDescription());
 
         // Setup the recycler view layout manager
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setStackFromEnd(true);
+        linearLayoutManager.setReverseLayout(true);
         rvComments.setLayoutManager(linearLayoutManager);
 
         toolbar.setNavigationOnClickListener(v -> finish());
 
         GlideApp.with(this)
-                .load(mUser.getProfileUrl())
+                .load(R.drawable.background)
+                .transform(new CircleCrop())
+                .into(ivOutline);
+
+        GlideApp.with(this)
+                .load(new ColorDrawable(getResources().getColor(R.color.white)))
+                .transform(new CircleCrop())
+                .into(ivBorder);
+
+        GlideApp.with(this)
+                .load(mPost.getUser().getProfileUrl())
                 .transform(new CircleCrop())
                 .into(ivProfile);
 
-        String postId = getIntent().getStringExtra("postId");
-        mPost = ((ParseApp) getApplication()).getPosts().getPostById(postId);
+        GlideApp.with(this)
+                .load(mUser.getProfileUrl())
+                .transform(new CircleCrop())
+                .into(ivProfileComment);
+
         getComments(mPost);
     }
 

@@ -35,7 +35,7 @@ public class AuthenticateActivity extends AppCompatActivity {
     @Nullable @BindView(R.id.tv_username_unavailable) TextView tvUsernameUnavailable;
     @Nullable @BindView(R.id.et_username) EditText etUsername;
     @Nullable @BindView(R.id.et_password) EditText etPassword;
-    @Nullable @BindView(R.id.iv_profile) ImageView ivProfile;
+    @Nullable @BindView(R.id.iv_outline) ImageView ivProfile;
     @Nullable @BindView(R.id.iv_border) ImageView ivBorder;
     @Nullable @BindView(R.id.btn_create_account) Button btnCreateAccount;
 

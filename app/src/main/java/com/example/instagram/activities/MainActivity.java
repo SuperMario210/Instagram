@@ -16,12 +16,13 @@ import com.example.instagram.fragments.ComposeFragment;
 import com.example.instagram.fragments.HomeFragment;
 import com.example.instagram.fragments.ProfileFragment;
 import com.example.instagram.models.Post;
+import com.example.instagram.models.User;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements ComposeFragment.OnFragmentClosedListener, ProfileFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements ComposeFragment.OnFragmentClosedListener, HomeFragment.OnProfileOpenedListener {
     HomeFragment mHomeFragment;
     ComposeFragment mComposeFragment;
     ProfileFragment mProfileFragment;
@@ -41,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements ComposeFragment.O
         // Initialize fragments
         mHomeFragment = new HomeFragment();
         mComposeFragment = new ComposeFragment();
-        mProfileFragment = new ProfileFragment();
+        mProfileFragment = new ProfileFragment(User.getCurrentUser(), true);
         mFragmentManager = getSupportFragmentManager();
 
         initializeBottomNavigation();
@@ -82,6 +83,8 @@ public class MainActivity extends AppCompatActivity implements ComposeFragment.O
     public void onBackPressed() {
         if(mCurrentFragment == mComposeFragment) {
             mComposeFragment.onBackPressed();
+        } else {
+            mFragmentManager.popBackStack();
         }
     }
 
@@ -104,8 +107,17 @@ public class MainActivity extends AppCompatActivity implements ComposeFragment.O
         mCurrentFragment.onActivityResult(requestCode, resultCode, data);
     }
 
-    @Override
-    public void onFragmentInteraction() {
 
+    @Override
+    public void onProfileOpened(User user) {
+        if(!user.getObjectId().equals(User.getCurrentUser().getObjectId())) {
+            ProfileFragment fragment = new ProfileFragment(user, false);
+            mFragmentManager.beginTransaction()
+                    .replace(R.id.fl_container, fragment)
+                    .addToBackStack(null)
+                    .commit();
+        } else {
+            bnMenu.setSelectedItemId(R.id.action_profile);
+        }
     }
 }

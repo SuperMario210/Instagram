@@ -8,40 +8,60 @@
     tools:context=".fragments.HomeFragment">
 
     <ImageView
-        android:id="@+id/iv_profile"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:id="@+id/iv_outline"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
         android:src="@drawable/avatar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/iv_border"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:src="@drawable/avatar"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_outline"
+        app:layout_constraintEnd_toEndOf="@+id/iv_outline"
+        app:layout_constraintStart_toStartOf="@+id/iv_outline"
+        app:layout_constraintTop_toTopOf="@+id/iv_outline" />
+
+    <ImageView
+        android:id="@+id/iv_profile"
+        android:layout_width="92dp"
+        android:layout_height="92dp"
+        android:src="@drawable/avatar"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_outline"
+        app:layout_constraintEnd_toEndOf="@+id/iv_outline"
+        app:layout_constraintStart_toStartOf="@+id/iv_outline"
+        app:layout_constraintTop_toTopOf="@+id/iv_outline" />
 
     <TextView
         android:id="@+id/tv_username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginTop="8dp"
-        android:text="supermario210"
+        android:minWidth="100dp"
+        android:text="test"
+        android:textAlignment="center"
         android:textColor="@color/black"
-        android:textSize="16sp"
+        android:textSize="18dp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_log_out" />
+        app:layout_constraintTop_toBottomOf="@+id/iv_outline"
+        app:layout_constraintWidth_min="80dp" />
 
     <TextView
         android:id="@+id/tv_bio"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
         android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam finibus purus at massa hendrerit, vulputate lobortis arcu commodo."
         android:textColor="@color/black_80_transparent"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_username" />
@@ -61,8 +81,8 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.15"
-        app:layout_constraintStart_toEndOf="@+id/iv_profile"
-        app:layout_constraintTop_toTopOf="@+id/iv_profile" />
+        app:layout_constraintStart_toEndOf="@+id/iv_outline"
+        app:layout_constraintTop_toTopOf="@+id/iv_outline" />
 
     <TextView
         android:id="@+id/textView5"
@@ -108,7 +128,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias=".85"
-        app:layout_constraintStart_toEndOf="@+id/iv_profile"
+        app:layout_constraintStart_toEndOf="@+id/iv_outline"
         app:layout_constraintTop_toTopOf="@+id/tv_posts" />
 
     <TextView
@@ -125,24 +145,28 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias=".5"
-        app:layout_constraintStart_toEndOf="@+id/iv_profile"
+        app:layout_constraintStart_toEndOf="@+id/iv_outline"
         app:layout_constraintTop_toTopOf="@+id/tv_posts" />
 
     <Button
         android:id="@+id/btn_log_out"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
         android:background="@drawable/button_blue"
         android:minWidth="0dip"
         android:minHeight="0dip"
+        android:paddingStart="8dp"
         android:paddingTop="4dp"
+        android:paddingEnd="8dp"
         android:paddingBottom="4dp"
         android:text="Log out"
         android:textAllCaps="false"
         android:textColor="@color/white"
-        app:layout_constraintEnd_toEndOf="@+id/iv_profile"
-        app:layout_constraintStart_toStartOf="@+id/iv_profile"
-        app:layout_constraintTop_toBottomOf="@+id/iv_profile" />
+        app:layout_constraintEnd_toEndOf="@+id/textView7"
+        app:layout_constraintStart_toStartOf="@+id/textView5"
+        app:layout_constraintTop_toBottomOf="@+id/textView9" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
