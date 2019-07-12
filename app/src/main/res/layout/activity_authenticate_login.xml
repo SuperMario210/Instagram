@@ -70,7 +70,7 @@
             app:layout_constraintTop_toBottomOf="@+id/et_username" />
 
         <Button
-            android:id="@+id/btn_create_account"
+            android:id="@+id/btn_log_in"
             style="?android:attr/borderlessButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

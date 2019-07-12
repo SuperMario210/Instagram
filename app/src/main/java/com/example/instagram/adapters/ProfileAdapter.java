@@ -102,12 +102,12 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         @BindView(R.id.iv_post) ImageView ivPost;
 
-        public PostGridViewHolder(@NonNull View view) {
+        private PostGridViewHolder(@NonNull View view) {
             super(view);
             ButterKnife.bind(this, view);
         }
 
-        public void bindPost(Post post, Context context) {
+        private void bindPost(Post post, Context context) {
             mPost = post;
             mContext = context;
 
@@ -131,18 +131,22 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         @BindView(R.id.tv_following) TextView tvFollowing;
         @BindView(R.id.btn_log_out) Button btnLogout;
 
-        public ProfileViewHolder(@NonNull View view) {
+        private ProfileViewHolder(@NonNull View view) {
             super(view);
             ButterKnife.bind(this, view);
         }
 
-        public void bindUser(User user, Context context) {
+        private void bindUser(User user, Context context) {
             mUser = user;
             mContext = context;
 
             tvUsername.setText(mUser.getUsername());
             tvPosts.setText(String.format(Locale.getDefault(), "%d", mPosts.size()));
 
+            initProfileImage();
+        }
+
+        private void initProfileImage() {
             if(!mIsCurrentUser) {
                 btnLogout.setVisibility(View.GONE);
                 ivProfile.setVisibility(View.GONE);
@@ -180,7 +184,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
         }
 
-        public void setProfileImage(Bitmap bitmap) {
+        private void setProfileImage(Bitmap bitmap) {
             GlideApp.with(mContext)
                     .load(bitmap)
                     .transform(new CircleCrop())

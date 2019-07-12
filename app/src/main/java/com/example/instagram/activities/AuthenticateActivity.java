@@ -20,6 +20,7 @@ import com.example.instagram.R;
 import com.example.instagram.models.GlideApp;
 import com.example.instagram.models.User;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import java.util.Stack;
 
@@ -53,9 +54,9 @@ public class AuthenticateActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Bypass authentication activity if user is already logged in
-        if(User.getCurrentUser() != null) {
-            switchToHomeActivity(null);
-        }
+//        if(User.getCurrentUser() != null) {
+//            switchToHomeActivity(null);
+//        }
 
         // Set the current view
         setContentView(R.layout.activity_authenticate);
@@ -75,14 +76,14 @@ public class AuthenticateActivity extends AppCompatActivity {
     private void initViewAnimator() {
         // Add views to the view animator
         viewAnimator = findViewById(R.id.view_animator);
-        viewAnimator.addView(
-                getLayoutInflater().inflate(R.layout.activity_authenticate_home, null), HOME);
-        viewAnimator.addView(
-                getLayoutInflater().inflate(R.layout.activity_authenticate_login, null), LOGIN);
-        viewAnimator.addView(
-                getLayoutInflater().inflate(R.layout.activity_authenticate_create, null), CREATE);
-        viewAnimator.addView(
-                getLayoutInflater().inflate(R.layout.activity_authenticate_welcome, null), WELCOME);
+        viewAnimator.addView(getLayoutInflater()
+                .inflate(R.layout.activity_authenticate_home, viewAnimator, false), HOME);
+        viewAnimator.addView(getLayoutInflater()
+                .inflate(R.layout.activity_authenticate_login, viewAnimator, false), LOGIN);
+        viewAnimator.addView(getLayoutInflater()
+                .inflate(R.layout.activity_authenticate_create, viewAnimator, false), CREATE);
+        viewAnimator.addView(getLayoutInflater()
+                .inflate(R.layout.activity_authenticate_welcome, viewAnimator, false), WELCOME);
 
         // Set up view animator animations
         viewAnimator.setAnimateFirstView(false);
@@ -206,7 +207,7 @@ public class AuthenticateActivity extends AppCompatActivity {
         String password = etPassword.getText().toString();
 
         // Log in user
-        User.logInInBackground(username, password, (user, e) -> {
+        ParseUser.logInInBackground(username, password, (user, e) -> {
             if(e == null) {
                 switchToHomeActivity(null);
             } else {
@@ -218,8 +219,8 @@ public class AuthenticateActivity extends AppCompatActivity {
 
     public void onCreateClick(View view) {
         // Get username and password from views
-        String username = etUsername.getText().toString();
-        String password = etPassword.getText().toString();
+        String username = etUsernameCreate.getText().toString();
+        String password = etPasswordCreate.getText().toString();
 
         // Create the user and set its properties
         final User user = new User();

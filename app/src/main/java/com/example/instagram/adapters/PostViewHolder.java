@@ -81,7 +81,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
             mContext.startActivity(i);
         });
 
-        initFavoriteIcon();
+        initFavorites();
         initUserInfo();
     }
 
@@ -99,7 +99,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
         ivProfile.setOnClickListener(listener);
     }
 
-    private void initFavoriteIcon() {
+    private void initFavorites() {
         final Drawable active_icon = ContextCompat.getDrawable(mContext, R.drawable.ufi_heart_active);
         DrawableCompat.setTint(
                 DrawableCompat.wrap(active_icon),

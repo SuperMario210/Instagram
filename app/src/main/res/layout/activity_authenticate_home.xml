@@ -14,7 +14,7 @@
         app:layout_constraintVertical_bias="0.35">
 
         <Button
-            android:id="@+id/btn_create_account"
+            android:id="@+id/btn_go_to_create_account"
             style="?android:attr/borderlessButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -62,7 +62,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_create_account" />
+            app:layout_constraintTop_toBottomOf="@+id/btn_go_to_create_account" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
