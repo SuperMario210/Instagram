@@ -8,8 +8,7 @@ import android.util.Log;
 
 import java.io.File;
 
-public class BitmapUtils
-{
+public class BitmapUtils {
     /**
      * Scales a bitmap to maintain its aspect ratio given a desired width
      * @param b the bitmap to scale
@@ -50,6 +49,12 @@ public class BitmapUtils
         }
     }
 
+    /**
+     * Rotates a bitmap by the desired amount in degrees
+     * @param b the bitmap to rotate
+     * @param degrees the amount in degrees to rotate the bitmap
+     * @return a new bitmap that is a copy of the original rotated by the specified amount
+     */
     public static Bitmap rotateBitmap(Bitmap b, int degrees) {
         Matrix matrix = new Matrix();
         if (degrees != 0) {

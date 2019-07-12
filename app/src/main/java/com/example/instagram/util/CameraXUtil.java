@@ -10,6 +10,13 @@ import androidx.camera.core.Preview;
 import androidx.camera.core.PreviewConfig;
 
 public class CameraXUtil {
+    /**
+     * Builds a transformation matrix based on the width, height, and rotation of the camera view
+     * @param width the width of the camera view
+     * @param height the height of the camera view
+     * @param rotation the rotation of the display
+     * @return a matrix to transform the camera view to the correct orientation
+     */
     public static Matrix getTransformMatrix(int width, int height, int rotation) {
         Matrix matrix = new Matrix();
 
@@ -25,6 +32,12 @@ public class CameraXUtil {
         return matrix;
     }
 
+    /**
+     * Builds a new camera preview based on the width and height of the viewfinder
+     * @param width the width of the camera view
+     * @param height the height of the camera view
+     * @return the new camera preview
+     */
     public static Preview getPreview(int width, int height) {
         // Create configuration object for the preview use case
         PreviewConfig config = new PreviewConfig.Builder()
@@ -34,6 +47,12 @@ public class CameraXUtil {
         return new Preview(config);
     }
 
+    /**
+     * Builds a new image capture object based on the width and height of the desired final image
+     * @param width the width of the final image
+     * @param height the height of the final image
+     * @return a new image capture
+     */
     public static ImageCapture getImageCapture(int width, int height) {
         // Create configuration object for the image capture use case
         ImageCaptureConfig imageCaptureConfig = new ImageCaptureConfig.Builder()

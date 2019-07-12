@@ -5,7 +5,6 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import com.example.instagram.interfaces.BooleanCallback;
-import com.example.instagram.interfaces.LoginCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseQuery;
@@ -97,11 +96,6 @@ public class User {
         ParseUser parseUser = ParseUser.getCurrentUser();
         if(parseUser == null) return null;
         return new User(parseUser);
-    }
-
-    public static void logInInBackground(String username, String password, LoginCallback callback) {
-        ParseUser.logInInBackground(username, password,
-                (user, e) -> callback.done(new User(user), e));
     }
 
 }

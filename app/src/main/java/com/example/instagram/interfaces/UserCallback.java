@@ -6,8 +6,8 @@ public interface UserCallback extends Callback<User> {
     /**
      * Override this function with the code you want to run after the operation is complete.
      *
-     * @param v
+     * @param u
      */
     @Override
-    void done(User v);
+    void done(User u);
 }
