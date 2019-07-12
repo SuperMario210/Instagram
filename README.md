@@ -43,6 +43,7 @@ The following **additional** features are implemented:
 - [x] Used the CameraX library to embed the camera in the app
 - [x] Used the MediaPicker library to select images from any directory on the phone
 - [x] Query the database to check if a username has already been taken as the user is inputting it
+- [x] Animate transitions in the authentication activity using a view animator
 
 Please list two areas of the assignment you'd like to **discuss further with your peers** during the next class (examples include better ways to implement something, how to extend your app in certain ways, etc):
 
