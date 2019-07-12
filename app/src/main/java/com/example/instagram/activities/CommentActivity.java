@@ -1,4 +1,4 @@
-package com.example.instagram;
+package com.example.instagram.activities;
 
 import android.app.Activity;
 import android.graphics.drawable.ColorDrawable;
@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.example.instagram.ParseApp;
+import com.example.instagram.R;
 import com.example.instagram.adapters.CommentAdapter;
 import com.example.instagram.models.Comment;
 import com.example.instagram.models.GlideApp;
@@ -69,8 +71,18 @@ public class CommentActivity extends AppCompatActivity {
         linearLayoutManager.setReverseLayout(true);
         rvComments.setLayoutManager(linearLayoutManager);
 
+        // Setup the toolbar navigation icon
         toolbar.setNavigationOnClickListener(v -> finish());
 
+        initProfileImages();
+
+        getComments(mPost);
+    }
+
+    /**
+     * Load and round the profile images in the layout
+     */
+    private void initProfileImages() {
         GlideApp.with(this)
                 .load(R.drawable.background)
                 .transform(new CircleCrop())
@@ -90,14 +102,18 @@ public class CommentActivity extends AppCompatActivity {
                 .load(mUser.getProfileUrl())
                 .transform(new CircleCrop())
                 .into(ivProfileComment);
-
-        getComments(mPost);
     }
 
+    /**
+     * Queries the comments for a given post from parse
+     * @param post the post to get the comments for
+     */
     private void getComments(Post post) {
+        // Build a query to get the comments for a post
         final Comment.Query query = new Comment.Query().withUser().forPost(post);
         query.findInBackground((List<Comment> comments, ParseException e) -> {
             if(e == null) {
+                // Add the comments to the adapter and update it
                 mComments.addAll(comments);
                 mCommentAdapter.notifyDataSetChanged();
             } else {
@@ -106,6 +122,9 @@ public class CommentActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Posts a new comment, called when the post button is clicked
+     */
     public void postComment(View view) {
         String text = etComment.getText().toString();
 
@@ -123,10 +142,12 @@ public class CommentActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Utility method for hiding the keyboard
+     */
     private void hideKeyboard() {
         InputMethodManager inputMethodManager =
                 (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
     }
-
 }
