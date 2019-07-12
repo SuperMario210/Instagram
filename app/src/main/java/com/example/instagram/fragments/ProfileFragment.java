@@ -44,16 +44,21 @@ import butterknife.Unbinder;
 import static android.app.Activity.RESULT_OK;
 
 public class ProfileFragment extends BackPressListenerFragment {
+    // The number of columns in the posts grid
     private final static int COLUMN_COUNT = 3;
 
     private Unbinder mUnbinder;
-    private User mUser;
     private ProfileAdapter mProfileAdapter;
-    private List<Post> mPosts;
     private boolean mIsCurrentUser;
+    private User mUser; // The user whose profile we are displaying
+    private List<Post> mPosts; // The list of the user's posts
 
     @BindView(R.id.rv_posts) RecyclerView rvPosts;
 
+    /**
+     * @param user the user whose information to display in the fragment
+     * @param isCurrentUser is the user the current user
+     */
     public ProfileFragment(User user, boolean isCurrentUser) {
         mUser = user;
         mIsCurrentUser = isCurrentUser;
@@ -64,15 +69,12 @@ public class ProfileFragment extends BackPressListenerFragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         mUnbinder = ButterKnife.bind(this, view);
-
         return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        getPosts();
 
         // Setup the recycler view adapter
         mPosts = new ArrayList<>();
@@ -83,20 +85,25 @@ public class ProfileFragment extends BackPressListenerFragment {
         // Setup the recycler view layout manager
         GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), COLUMN_COUNT,
                 RecyclerView.VERTICAL, false);
+        // Override the span size lookup to make the first element of the recycler view wider
         layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                if(mProfileAdapter.getItemViewType(position) == mProfileAdapter.FIRST_ITEM) {
+                // Make the first element take up the entire width
+                if(mProfileAdapter.getItemViewType(position) == ProfileAdapter.FIRST_ITEM) {
                     return COLUMN_COUNT;
                 } else {
                     return 1;
                 }
             }
         });
-
         rvPosts.setLayoutManager(layoutManager);
 
+        // Add spacing in between elements of the grid
         rvPosts.addItemDecoration(new SpaceItemDecoration(6, COLUMN_COUNT));
+
+        // Load the user's posts
+        getUserPosts();
     }
 
     @Override public void onDestroyView() {
@@ -104,17 +111,30 @@ public class ProfileFragment extends BackPressListenerFragment {
         mUnbinder.unbind();
     }
 
-    private void logOut() {
-        ParseUser.getCurrentUser().logOut();
-        Intent i = new Intent(getContext(), AuthenticateActivity.class);
-        startActivity(i);
-        getActivity().finish();
+    /**
+     * Handle intent results for uploading a profile picture from the gallery
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == ImagePicker.IMAGE_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
+            List<String> mPaths = data.getStringArrayListExtra(ImagePicker.EXTRA_IMAGE_PATH);
+            handleMediaUpload(mPaths.get(0));
+        }
     }
 
-    private void getPosts() {
-        final ParseQuery<Post> query = new Post.Query().getTop().withUser().withFavorites().whereEqualTo("user", mUser.getParseUser());
-        query.orderByDescending("createdAt").findInBackground((List<Post> posts, ParseException e) -> {
+    /**
+     * Gets posts that the user has authored and stores them in the mPosts list
+     */
+    private void getUserPosts() {
+        // Build a query to get the current user's posts
+        final ParseQuery<Post> query = new Post.Query()
+                .withUser()
+                .forUser(mUser);
+
+        query.findInBackground((List<Post> posts, ParseException e) -> {
             if(e == null) {
+                // Add the posts to the user's post list
                 mPosts.clear();
                 mPosts.addAll(posts);
                 mProfileAdapter.notifyDataSetChanged();
@@ -124,16 +144,21 @@ public class ProfileFragment extends BackPressListenerFragment {
         });
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == ImagePicker.IMAGE_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
-            List<String> mPaths = data.getStringArrayListExtra(ImagePicker.EXTRA_IMAGE_PATH);
-            handleGalleryUpload(mPaths.get(0));
-        }
+    /**
+     * Log out the current user the go back to the authentication activity
+     */
+    private void logOut() {
+        ParseUser.getCurrentUser().logOut();
+        Intent i = new Intent(getContext(), AuthenticateActivity.class);
+        startActivity(i);
+        getActivity().finish();
     }
 
-    private void handleGalleryUpload(String filePath) {
+    /**
+     * Format and upload a new profile picture selected by the media selector
+     * @param filePath
+     */
+    private void handleMediaUpload(String filePath) {
         Bitmap bitmap = BitmapFactory.decodeFile(filePath);
         bitmap = BitmapUtils.scaleToFitWidth(bitmap, 1024);
         bitmap = BitmapUtils.cropToAspectRatio(bitmap, 1, 1);

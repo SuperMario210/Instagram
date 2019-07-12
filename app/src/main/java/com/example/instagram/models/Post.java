@@ -143,8 +143,13 @@ public class Post extends ParseObject {
             orderByDescending("createdAt");
         }
 
-        public Query getTop() {
-            setLimit(20);
+        public Query setLimit(int limit) {
+            setLimit(limit);
+            return this;
+        }
+
+        public Query forUser(User user) {
+            whereEqualTo("user", user.getParseUser());
             return this;
         }
 

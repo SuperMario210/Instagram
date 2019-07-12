@@ -70,8 +70,8 @@ public class HomeFragment extends BackPressListenerFragment {
         mScrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                // Load more posts to the timeline
-                getPosts();
+                // Load more posts to the home page
+                loadPosts();
             }
         };
         rvPosts.addOnScrollListener(mScrollListener);
@@ -79,56 +79,13 @@ public class HomeFragment extends BackPressListenerFragment {
         // Setup the swipe container
         swipeContainer.setOnRefreshListener(() -> {
             mPosts.clearData();
-            getPosts();
+            loadPosts();
         });
-        // Configure the refreshing colors
         swipeContainer.setColorSchemeResources(
-                R.color.red_5,
-                R.color.green_5,
-                R.color.blue_5,
-                R.color.purple_5);
+                R.color.red_5, R.color.green_5, R.color.blue_5, R.color.purple_5);
 
-        getPosts();
-    }
-
-    @Override public void onDestroyView() {
-        super.onDestroyView();
-        mUnbinder.unbind();
-    }
-
-    private void getPosts() {
-        final Post.Query query = new Post.Query()
-                .getTop()
-                .withUser()
-                .withFavorites()
-                .olderThan(mPosts.getOldestDate());
-        query.findInBackground((List<Post> posts, ParseException e) -> {
-            if(e == null) {
-                for(Post post : posts) {
-                    mPostAdapter.notifyItemInserted(mPosts.addPost(post));
-                }
-                swipeContainer.setRefreshing(false);
-            } else {
-                Log.e("MainActivity", "Couldn't load posts", e);
-            }
-        });
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnProfileOpenedListener) {
-            mListener = (OnProfileOpenedListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
+        // Load posts from parse
+        loadPosts();
     }
 
     /**
@@ -140,7 +97,66 @@ public class HomeFragment extends BackPressListenerFragment {
         return false;
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+    @Override public void onDestroyView() {
+        super.onDestroyView();
+        mUnbinder.unbind();
+    }
+
+    /**
+     * Override the onAttach function to keep a reference to the attached context for interfacing
+     * with the activity this fragment is attached to
+     */
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnProfileOpenedListener) {
+            mListener = (OnProfileOpenedListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    /**
+     * Load more posts from parse
+     */
+    private void loadPosts() {
+        // Build a query to load the next 20 posts from parse
+        final Post.Query query = new Post.Query()
+                .setLimit(20)
+                .withUser()
+                .withFavorites()
+                .olderThan(mPosts.getOldestDate());
+
+        query.findInBackground((List<Post> posts, ParseException e) -> {
+            if(e == null) {
+                // Save the posts into the postData object and update the adapter
+                for(Post post : posts) {
+                    mPostAdapter.notifyItemInserted(mPosts.addPost(post));
+                }
+
+                // Hide the refreshing icon
+                swipeContainer.setRefreshing(false);
+            } else {
+                Log.e("MainActivity", "Couldn't load posts", e);
+            }
+        });
+    }
+
+    /**
+     * Interface for interacting with the activity the fragment is attached to
+     */
     public interface OnProfileOpenedListener {
+        /**
+         * Called when the a profile is opened
+         * @param user the user whose profile is being opened
+         */
         void onProfileOpened(User user);
     }
 }

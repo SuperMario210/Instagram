@@ -431,7 +431,6 @@ public class ComposeFragment extends BackPressListenerFragment {
     /**
      * Override the onAttach function to keep a reference to the attached context for interfacing
      * with the activity this fragment is attached to
-     * @param context
      */
     @Override
     public void onAttach(Context context) {
