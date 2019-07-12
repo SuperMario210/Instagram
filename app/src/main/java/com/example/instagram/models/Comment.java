@@ -12,12 +12,19 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+/**
+ * This class holds the data for a comment made on a post.  Each comment stores the user who made
+ * the comment, the post the comment was made on, and the text of the comment.
+ */
 @ParseClassName("Comment")
 public class Comment extends ParseObject {
     private static final String KEY_USER = "user";
     private static final String KEY_POST = "post";
     private static final String KEY_TEXT = "text";
 
+    /**
+     * Creates a new comment from the required fields
+     */
     public static Comment createComment(User user, Post post, String text, final SaveCallback callback) {
         final Comment newComment = new Comment();
         newComment.setUser(user.getParseUser());
@@ -30,19 +37,6 @@ public class Comment extends ParseObject {
 
     public User getUser() {
         return new User(getParseUser(KEY_USER));
-    }
-
-    public SpannableStringBuilder getFormattedText() {
-        String caption = getUser().getUsername() + " " + getText();
-        SpannableStringBuilder builder = new SpannableStringBuilder(caption);
-        builder.setSpan(new StyleSpan(Typeface.BOLD),
-                0, getUser().getUsername().length(),
-                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-        return builder;
-    }
-
-    public String getFormattedDate() {
-        return DateUtil.formatTimestamp(getCreatedAt());
     }
 
     public void setUser(ParseUser user) {
@@ -65,15 +59,30 @@ public class Comment extends ParseObject {
         return getString(KEY_TEXT);
     }
 
+    /**
+     * Prepends the text of a comment with the bolded username of the user who made the comment
+     * @return the formatted comment
+     */
+    public SpannableStringBuilder getFormattedText() {
+        String caption = getUser().getUsername() + " " + getText();
+        SpannableStringBuilder builder = new SpannableStringBuilder(caption);
+        builder.setSpan(new StyleSpan(Typeface.BOLD),
+                0, getUser().getUsername().length(),
+                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        return builder;
+    }
+
+    /**
+     * @return a relative timestamp to when the comment was created
+     */
+    public String getFormattedDate() {
+        return DateUtil.formatTimestamp(getCreatedAt());
+    }
+
     public static class Query extends ParseQuery<Comment> {
         public Query() {
             super(Comment.class);
             orderByDescending("createdAt");
-        }
-
-        public Comment.Query getTop() {
-            setLimit(20);
-            return this;
         }
 
         public Comment.Query withUser() {

@@ -6,7 +6,6 @@ import androidx.annotation.Nullable;
 
 import com.example.instagram.interfaces.BooleanCallback;
 import com.example.instagram.interfaces.LoginCallback;
-import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseQuery;
@@ -14,9 +13,12 @@ import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.parse.SignUpCallback;
 
-@ParseClassName("User")
+/**
+ * Utility class that wraps a user object in order to make it easier to perform certain operations
+ * on the user such as setting a profile image
+ */
 public class User {
-    private static final String DEFAULT_URL = "https://instagram.fhel3-1.fna.fbcdn.net/vp/f7f9ca3c7981731efe2de600e0b99c46/5DA39AF1/t51.2885-19/44884218_345707102882519_2446069589734326272_n.jpg?_nc_ht=instagram.fhel3-1.fna.fbcdn.net";
+    private static final String DEFAULT_PROFILE = "https://instagram.fhel3-1.fna.fbcdn.net/vp/f7f9ca3c7981731efe2de600e0b99c46/5DA39AF1/t51.2885-19/44884218_345707102882519_2446069589734326272_n.jpg?_nc_ht=instagram.fhel3-1.fna.fbcdn.net";
     private static final String KEY_PROFILE_IMAGE = "profileImage";
     private static final String KEY_BANNER_IMAGE = "banner_image";
     private static final String KEY_PROFILE_DESCRIPTION = "profile_description";
@@ -41,14 +43,6 @@ public class User {
 
     public String getUsername() {
         return mUser.getUsername();
-    }
-
-    public void setEmail(String email) {
-        mUser.setEmail(email);
-    }
-
-    public String getEmail() {
-        return mUser.getEmail();
     }
 
     public void setPassword(String password) {
@@ -79,7 +73,7 @@ public class User {
     }
 
     public String getProfileUrl() {
-        return getProfileImage() == null ? DEFAULT_URL : getProfileImage().getUrl();
+        return getProfileImage() == null ? DEFAULT_PROFILE : getProfileImage().getUrl();
     }
 
     public ParseUser getParseUser() {
@@ -92,8 +86,8 @@ public class User {
             if(e == null) {
                 callback.done(users.isEmpty());
             } else {
-                Log.e("User", "DISASTER", e);
-                // TODO: handle error
+                callback.done(false);
+                Log.e("User", "Could not query users", e);
             }
         });
         return query;

@@ -31,14 +31,19 @@ public class PostData {
     }
 
     /**
-     * Gets a post by uid
-     * @param id
-     * @return post with the specified uid
+     * Gets a post by id
+     * @param id the id of the post to get
+     * @return post with the specified id
      */
     public Post getPostById(String id) {
         return mPosts.get(id);
     }
 
+    /**
+     * Gets a post by index
+     * @param index the index of the post to get
+     * @return the post at the specified index
+     */
     public Post getPostByIndex(int index) {
         return mPosts.get(mIds.get(index));
     }

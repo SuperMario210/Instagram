@@ -8,7 +8,6 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.example.instagram.util.DateUtil;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -23,6 +22,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * This class holds the data for a post.  Each post stores the user who made the post, the the post
+ * description, the image associated with the post, and an array of users who favorited the post.
+ */
 @ParseClassName("Post")
 public class Post extends ParseObject {
     private static final String KEY_DESCRIPTION = "description";
@@ -30,6 +33,9 @@ public class Post extends ParseObject {
     private static final String KEY_USER = "user";
     private static final String KEY_FAVORITES = "favorites";
 
+    /**
+     * Creates a new post from the required fields
+     */
     public static Post createPost(String description, ParseFile image,
                                   User user, final SaveCallback callback) {
         final Post newPost = new Post();
@@ -48,19 +54,6 @@ public class Post extends ParseObject {
         });
 
         return newPost;
-    }
-
-    public String getFormattedDate() {
-        return DateUtil.formatTimestamp(getCreatedAt());
-    }
-
-    public SpannableStringBuilder getFormattedDescription() {
-        String caption = getUser().getUsername() + " " + getDescription();
-        SpannableStringBuilder builder = new SpannableStringBuilder(caption);
-        builder.setSpan(new StyleSpan(Typeface.BOLD),
-                0, getUser().getUsername().length(),
-                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-        return builder;
     }
 
     public String getDescription() {
@@ -98,7 +91,7 @@ public class Post extends ParseObject {
         put(KEY_USER, user);
     }
 
-    public List<ParseUser> getFavorites() {
+    private List<ParseUser> getFavorites() {
         List<ParseUser> users = getList(KEY_FAVORITES);
         if(users == null)
             return new ArrayList<>();
@@ -113,7 +106,7 @@ public class Post extends ParseObject {
         removeAll(KEY_FAVORITES, java.util.Collections.singleton(user.getParseUser()));
     }
 
-    public boolean isLikedByUser(User user) {
+    public boolean isFavoritedByUser(User user) {
         List<ParseUser> users = getFavorites();
         for(ParseUser u : users)
             if(u.getObjectId().equals(user.getObjectId())) return true;
@@ -124,13 +117,33 @@ public class Post extends ParseObject {
         return getFavorites().size();
     }
 
-    public String getNumFavoritesString() {
+    /**
+     * Prepends the description of a post with the bolded username of the user who made the post
+     * @return the formatted description
+     */
+    public SpannableStringBuilder getFormattedDescription() {
+        String caption = getUser().getUsername() + " " + getDescription();
+        SpannableStringBuilder builder = new SpannableStringBuilder(caption);
+        builder.setSpan(new StyleSpan(Typeface.BOLD),
+                0, getUser().getUsername().length(),
+                Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        return builder;
+    }
+
+    /**
+     * Appends "likes" (or "like" if there is only 1 like) to the number of favorites for displaying
+     * @return the formatted number of likes
+     */
+    public String formatNumFavorites() {
         int numFaves = getNumFavorites();
         if(numFaves == 1)
             return String.format(Locale.getDefault(), "%d like", numFaves);
         return String.format(Locale.getDefault(), "%d likes", numFaves);
     }
 
+    /**
+     * @return the post creation date in Month Date Year, Time format
+     */
     public static String formatDate(Date date) {
         String timeFormat = (date.getYear() != new Date().getYear()) ? "MMM dd yyyy, h:mma" : "MMM dd, h:mma";
         SimpleDateFormat sdf = new SimpleDateFormat(timeFormat, Locale.ENGLISH);

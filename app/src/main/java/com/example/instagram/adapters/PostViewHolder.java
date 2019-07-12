@@ -108,28 +108,28 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
         final Drawable icon = ContextCompat.getDrawable(mContext, R.drawable.ufi_heart);
         final Animation bounceAnim = AnimationUtils.loadAnimation(mContext, R.anim.bounce_scale);
 
-        tvFavorites.setText(mPost.getNumFavoritesString());
+        tvFavorites.setText(mPost.formatNumFavorites());
 
         User currentUser = User.getCurrentUser();
-        if(!mPost.isLikedByUser(currentUser)) {
-            ivFavorite.setImageDrawable(icon);
-        } else {
+        if(mPost.isFavoritedByUser(currentUser)) {
             ivFavorite.setImageDrawable(active_icon);
+        } else {
+            ivFavorite.setImageDrawable(icon);
         }
 
         ivFavorite.setOnClickListener(v -> {
-            if(!mPost.isLikedByUser(currentUser)) {
-                mPost.addFavorite(currentUser);
+            if(mPost.isFavoritedByUser(currentUser)) {
+                mPost.removeFavorite(currentUser);
                 mPost.saveInBackground(e -> {
-                    tvFavorites.setText(mPost.getNumFavoritesString());
-                    ivFavorite.setImageDrawable(active_icon);
+                    tvFavorites.setText(mPost.formatNumFavorites());
+                    ivFavorite.setImageDrawable(icon);
                     ivFavorite.startAnimation(bounceAnim);
                 });
             } else {
-                mPost.removeFavorite(currentUser);
+                mPost.addFavorite(currentUser);
                 mPost.saveInBackground(e -> {
-                    tvFavorites.setText(mPost.getNumFavoritesString());
-                    ivFavorite.setImageDrawable(icon);
+                    tvFavorites.setText(mPost.formatNumFavorites());
+                    ivFavorite.setImageDrawable(active_icon);
                     ivFavorite.startAnimation(bounceAnim);
                 });
             }
