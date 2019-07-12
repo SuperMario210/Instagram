@@ -5,7 +5,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.StyleSpan;
 
-import com.example.instagram.util.DateFormatter;
+import com.example.instagram.util.DateUtil;
 import com.parse.ParseClassName;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -42,7 +42,7 @@ public class Comment extends ParseObject {
     }
 
     public String getFormattedDate() {
-        return DateFormatter.formatTimestamp(getCreatedAt());
+        return DateUtil.formatTimestamp(getCreatedAt());
     }
 
     public void setUser(ParseUser user) {

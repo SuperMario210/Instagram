@@ -11,8 +11,6 @@ import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Rational;
-import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.TextureView;
 import android.view.View;
@@ -30,9 +28,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.camera.core.CameraX;
 import androidx.camera.core.ImageCapture;
-import androidx.camera.core.ImageCaptureConfig;
 import androidx.camera.core.Preview;
-import androidx.camera.core.PreviewConfig;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.exifinterface.media.ExifInterface;
@@ -44,7 +40,7 @@ import com.example.instagram.models.GlideApp;
 import com.example.instagram.models.Post;
 import com.example.instagram.models.User;
 import com.example.instagram.util.BitmapUtils;
-import com.example.instagram.util.OrientationUtils;
+import com.example.instagram.util.CameraXUtil;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 
@@ -63,21 +59,17 @@ import butterknife.Unbinder;
 import static android.app.Activity.RESULT_OK;
 
 public class ComposeFragment extends BackPressListenerFragment {
-    // Directory to save images in
-    private static final String APP_TAG = "fbu_instagram";
     // Request code for camera permission
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 10;
 
     private Unbinder mUnbinder;
     private Bitmap mBitmap;
-    private View mView;
     private OnFragmentClosedListener mListener;
     private Post mPost;
 
     // CameraX variables
     private ImageCapture mImageCapture;
     private Preview mPreview;
-    private Preview.OnPreviewOutputUpdateListener mPreviewListener;
 
     @BindView(R.id.camera) TextureView mCameraView;
     @BindView(R.id.fl_options) FrameLayout flOptions;
@@ -89,14 +81,12 @@ public class ComposeFragment extends BackPressListenerFragment {
     @BindView(R.id.iv_gallery) ImageView ivGallery;
     @BindView(R.id.pb_loading) ProgressBar pbLoading;
 
-
     /**
      * This enum holds the different states that the compose fragment can be in (taking a picture,
-     * adding a filter, captioning the picture)
+     * adding a filter, captioning the picture).  Used for keeping handling back presses
      */
     public enum ComposeState {
         PICTURE,
-        FILTER,
         CAPTION
     }
     private ComposeState mCurrentState;
@@ -116,7 +106,6 @@ public class ComposeFragment extends BackPressListenerFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mView = view;
 
         // Check camera permissions and request them if necessary
         if (isCameraPermissionGranted()) {
@@ -133,19 +122,6 @@ public class ComposeFragment extends BackPressListenerFragment {
 
         // Setup the view
         switchToPictureView();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-    @Override
-    public void onStop() {
-        super.onStop();
     }
 
     @Override
@@ -170,23 +146,39 @@ public class ComposeFragment extends BackPressListenerFragment {
         mListener = null;
     }
 
+    @Override
+    public boolean onBackPressed() {
+        if(mCurrentState == ComposeState.CAPTION) {
+            switchToPictureView();
+        } else if(mCurrentState == ComposeState.PICTURE) {
+            mListener.onComposeCancel();
+        }
+        return true;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == ImagePicker.IMAGE_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
+            List<String> mPaths = data.getStringArrayListExtra(ImagePicker.EXTRA_IMAGE_PATH);
+            handleGalleryUpload(mPaths.get(0));
+            switchToCaptionView();
+        }
+    }
+
     /**
-     * Updates the transformation to ensure the camera preview is displayed correctly
+     * Override the onAttach function to keep a reference to the attached context for interfacing
+     * with the activity this fragment is attached to
      */
-    private void updateTransform() {
-        Matrix matrix = new Matrix();
-
-        // Compute the center of the view finder
-        float centerX = mCameraView.getWidth() / 2f;
-        float centerY = mCameraView.getHeight() / 2f;
-
-        // Correct preview output to account for display rotation
-        float rotationDegrees =
-                OrientationUtils.displayRotationToDegrees(mCameraView.getDisplay().getRotation());
-        matrix.postRotate(-rotationDegrees, centerX, centerY);
-
-        // Finally, apply transformations to our TextureView
-        mCameraView.setTransform(matrix);
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnFragmentClosedListener) {
+            mListener = (OnFragmentClosedListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
     }
 
     /**
@@ -196,34 +188,41 @@ public class ComposeFragment extends BackPressListenerFragment {
         int width = mCameraView.getWidth();
         int height = mCameraView.getHeight();
 
-        // Create configuration object for the preview use case
-        PreviewConfig config = new PreviewConfig.Builder()
-                .setTargetAspectRatio(new Rational(width, height))
-                .setTargetResolution(new Size(width, height))
-                .build();
-        mPreview = new Preview(config);
+        mImageCapture = CameraXUtil.getImageCapture(width, height);
+        mPreview = CameraXUtil.getPreview(width, height);
 
         // Create a preview listener to update the viewfinder
-        mPreviewListener = (output) -> {
+        mPreview.setOnPreviewOutputUpdateListener((output) -> {
             ViewGroup parent = (ViewGroup) mCameraView.getParent();
             parent.removeView(mCameraView);
             parent.addView(mCameraView, 0);
 
             mCameraView.setSurfaceTexture(output.getSurfaceTexture());
             updateTransform();
-        };
-        mPreview.setOnPreviewOutputUpdateListener(mPreviewListener);
-
-        // Create configuration object for the image capture use case
-        ImageCaptureConfig imageCaptureConfig = new ImageCaptureConfig.Builder()
-                .setTargetAspectRatio(new Rational(width, height))
-                .setCaptureMode(ImageCapture.CaptureMode.MIN_LATENCY)
-                .build();
-        mImageCapture = new ImageCapture(imageCaptureConfig);
+        });
 
         // Bind use cases to lifecycle
         CameraX.bindToLifecycle(this, mPreview, mImageCapture);
+    }
 
+    /**
+     * Checks if the camera permission is granted
+     * @return true if the camera permission is granted, false if not
+     */
+    private boolean isCameraPermissionGranted() {
+        return ContextCompat.checkSelfPermission(
+                getContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * Updates the transformation to ensure the camera preview is displayed correctly
+     */
+    private void updateTransform() {
+        Matrix matrix = CameraXUtil.getTransformMatrix(
+                mCameraView.getWidth(),
+                mCameraView.getHeight(),
+                mCameraView.getDisplay().getRotation());
+        mCameraView.setTransform(matrix);
     }
 
     /**
@@ -233,10 +232,7 @@ public class ComposeFragment extends BackPressListenerFragment {
         mCurrentState = ComposeState.PICTURE;
 
         // Setup the toolbar
-        toolbar.setNavigationOnClickListener(v -> {
-            mListener.onComposeCancel();
-            // todo: return to previous fragment
-        });
+        toolbar.setNavigationOnClickListener(v -> mListener.onComposeCancel());
         toolbar.setNavigationIcon(R.drawable.ic_vector_close);
         tvShare.setOnClickListener(null);
         tvShare.setVisibility(View.INVISIBLE);
@@ -254,6 +250,7 @@ public class ComposeFragment extends BackPressListenerFragment {
 
         // Handle shutter press
         ivShutter.setOnClickListener(v -> {
+            switchToCaptionView();
             mImageCapture.takePicture(BitmapUtils.getPhotoFileUri("temp", getContext()), new ImageCapture.OnImageSavedListener() {
                 @Override
                 public void onImageSaved(@NonNull File file) {
@@ -265,21 +262,18 @@ public class ComposeFragment extends BackPressListenerFragment {
                     Toast.makeText(getContext(), "Error saving image", Toast.LENGTH_SHORT).show();
                 }
             });
-
-            switchToCaptionView();
         });
 
-        ivGallery.setOnClickListener(v -> {
-            new ImagePicker.Builder(getActivity())
-                    .mode(ImagePicker.Mode.GALLERY)
-                    .compressLevel(ImagePicker.ComperesLevel.MEDIUM)
-                    .directory(ImagePicker.Directory.DEFAULT)
-                    .extension(ImagePicker.Extension.PNG)
-                    .scale(600, 600)
-                    .allowMultipleImages(false)
-                    .enableDebuggingMode(true)
-                    .build();
-        });
+        // Select gallery image
+        ivGallery.setOnClickListener(v -> new ImagePicker.Builder(getActivity())
+            .mode(ImagePicker.Mode.GALLERY)
+            .compressLevel(ImagePicker.ComperesLevel.MEDIUM)
+            .directory(ImagePicker.Directory.DEFAULT)
+            .extension(ImagePicker.Extension.PNG)
+            .scale(600, 600)
+            .allowMultipleImages(false)
+            .enableDebuggingMode(true)
+            .build());
     }
 
     /**
@@ -296,9 +290,8 @@ public class ComposeFragment extends BackPressListenerFragment {
         // Create the circular reveal animation for the options layout
         int x = flOptions.getMeasuredWidth() / 2;
         int y = flOptions.getMeasuredHeight() / 2;
-        int startRadius = 0;
         int endRadius = (int) Math.hypot((double) x, (double) y);
-        Animator anim = ViewAnimationUtils.createCircularReveal(flOptions, x, y, startRadius, endRadius);
+        Animator anim = ViewAnimationUtils.createCircularReveal(flOptions, x, y, 0, endRadius);
         anim.start();
 
         // Setup the toolbar
@@ -308,28 +301,24 @@ public class ComposeFragment extends BackPressListenerFragment {
     }
 
     /**
-     * Handles an image captured by cameraKit.  Scales, crops, and displays the image
+     * Handles an image captured by CameraX.  Scales, crops, and displays the image
      *
      * @param imageFile the file of the captured image returned by cameraX
      */
     private void handleImageCapture(final File imageFile) {
-        int rotationInDegrees = 0;
+        int rotation = 0;
         try {
             ExifInterface exif = new ExifInterface(imageFile.getPath());
-            rotationInDegrees = OrientationUtils.exifToDegrees(
-                    exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1));
+            rotation = exif.getRotationDegrees();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("ComposeFragment", "Couldn't get exif data", e);
         }
-
-        Matrix matrix = new Matrix();
-        if (rotationInDegrees != 0) {matrix.preRotate(rotationInDegrees);}
 
         // Decode the image into a bitmap
         mBitmap = BitmapFactory.decodeFile(imageFile.getPath());
-        mBitmap = Bitmap.createBitmap(mBitmap, 0, 0, mBitmap.getWidth(), mBitmap.getHeight(), matrix, true);
 
-        // Crop and scale the bitmap
+        // Rotate, crop and scale the bitmap
+        mBitmap = BitmapUtils.rotateBitmap(mBitmap, rotation);
         mBitmap = BitmapUtils.cropToAspectRatio(mBitmap, 1, 1);
         mBitmap = BitmapUtils.scaleToFitWidth(mBitmap, 1024);
 
@@ -345,12 +334,21 @@ public class ComposeFragment extends BackPressListenerFragment {
     }
 
     /**
-     * Checks if the camera permission is granted
-     * @return true if the camera permission is granted, false if not
+     * Handles an upload from the media picker
      */
-    private boolean isCameraPermissionGranted() {
-        return ContextCompat.checkSelfPermission(
-                getContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+    private void handleGalleryUpload(String filePath) {
+        mBitmap = BitmapFactory.decodeFile(filePath);
+        mBitmap = BitmapUtils.scaleToFitWidth(mBitmap, 1024);
+
+        // Display the bitmap in the preview image view
+        ivPreview.setVisibility(View.VISIBLE);
+        ivPreview.setImageBitmap(mBitmap);
+
+        tvShare.setOnClickListener(v -> {
+            tvShare.setVisibility(View.INVISIBLE);
+            pbLoading.setVisibility(View.VISIBLE);
+            submitPost();
+        });
     }
 
     /**
@@ -358,17 +356,16 @@ public class ComposeFragment extends BackPressListenerFragment {
      * etCaption
      */
     private void submitPost() {
-        // Configure byte output stream
+        // Configure byte output stream and compress the image further
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        // Compress the image further
         mBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
 
         // Create a new file for the resized bitmap (`getPhotoFileUri` defined above)
         File imageFile = BitmapUtils.getPhotoFileUri("temp.jpg", getContext());
         try {
+            // Write the bytes of the bitmap to file
             imageFile.createNewFile();
             FileOutputStream fos = new FileOutputStream(imageFile);
-            // Write the bytes of the bitmap to file
             fos.write(bytes.toByteArray());
             fos.close();
 
@@ -390,56 +387,6 @@ public class ComposeFragment extends BackPressListenerFragment {
         } catch (IOException e) {
             Log.e("ComposeFragment", "Couldn't write image to file", e);
             Toast.makeText(getContext(), "Couldn't share post!", Toast.LENGTH_LONG);
-        }
-    }
-
-
-    public boolean onBackPressed() {
-        if(mCurrentState == ComposeState.CAPTION) {
-            switchToPictureView();
-        } else if(mCurrentState == ComposeState.PICTURE) {
-            mListener.onComposeCancel();
-        }
-        return true;
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == ImagePicker.IMAGE_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
-            List<String> mPaths = data.getStringArrayListExtra(ImagePicker.EXTRA_IMAGE_PATH);
-            handleGalleryUpload(mPaths.get(0));
-            switchToCaptionView();
-        }
-    }
-
-    private void handleGalleryUpload(String filePath) {
-        mBitmap = BitmapFactory.decodeFile(filePath);
-        mBitmap = BitmapUtils.scaleToFitWidth(mBitmap, 1024);
-
-        // Display the bitmap in the preview image view
-        ivPreview.setVisibility(View.VISIBLE);
-        ivPreview.setImageBitmap(mBitmap);
-
-        tvShare.setOnClickListener(v -> {
-            tvShare.setVisibility(View.INVISIBLE);
-            pbLoading.setVisibility(View.VISIBLE);
-            submitPost();
-        });
-    }
-
-    /**
-     * Override the onAttach function to keep a reference to the attached context for interfacing
-     * with the activity this fragment is attached to
-     */
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentClosedListener) {
-            mListener = (OnFragmentClosedListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
         }
     }
 

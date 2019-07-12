@@ -8,7 +8,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.example.instagram.util.DateFormatter;
+import com.example.instagram.util.DateUtil;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -51,7 +51,7 @@ public class Post extends ParseObject {
     }
 
     public String getFormattedDate() {
-        return DateFormatter.formatTimestamp(getCreatedAt());
+        return DateUtil.formatTimestamp(getCreatedAt());
     }
 
     public SpannableStringBuilder getFormattedDescription() {
@@ -143,7 +143,7 @@ public class Post extends ParseObject {
             orderByDescending("createdAt");
         }
 
-        public Query setLimit(int limit) {
+        public Query getTop(int limit) {
             setLimit(limit);
             return this;
         }

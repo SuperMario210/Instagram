@@ -129,7 +129,7 @@ public class HomeFragment extends BackPressListenerFragment {
     private void loadPosts() {
         // Build a query to load the next 20 posts from parse
         final Post.Query query = new Post.Query()
-                .setLimit(20)
+                .getTop(20)
                 .withUser()
                 .withFavorites()
                 .olderThan(mPosts.getOldestDate());

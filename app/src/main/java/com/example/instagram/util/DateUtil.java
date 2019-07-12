@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class DateFormatter {
+public class DateUtil {
     /**
      * @return formatted timestamp to display on the timeline
      * @param date the date of the timestamp

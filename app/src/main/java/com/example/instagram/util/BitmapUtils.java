@@ -2,6 +2,7 @@ package com.example.instagram.util;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.os.Environment;
 import android.util.Log;
 
@@ -49,6 +50,14 @@ public class BitmapUtils
         }
     }
 
+    public static Bitmap rotateBitmap(Bitmap b, int degrees) {
+        Matrix matrix = new Matrix();
+        if (degrees != 0) {
+            matrix.preRotate(degrees);
+        }
+        return Bitmap.createBitmap(b, 0, 0, b.getWidth(), b.getHeight(), matrix, true);
+    }
+
     /**
      * Returns the File for a photo stored on disk given the fileName
      * @param fileName the filename of the file to store the photo in
@@ -70,5 +79,4 @@ public class BitmapUtils
 
         return file;
     }
-
 }

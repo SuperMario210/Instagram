@@ -4,7 +4,7 @@ import android.view.Surface;
 
 import androidx.exifinterface.media.ExifInterface;
 
-public class OrientationUtils {
+public class OrientationUtil {
     /**
      * Converts an exif orientation into degrees
      * @param exifOrientation the exif orientation
