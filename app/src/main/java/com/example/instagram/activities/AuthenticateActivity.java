@@ -11,8 +11,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewAnimator;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
@@ -27,17 +27,26 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class AuthenticateActivity extends AppCompatActivity {
+    // Indices for each view inside the view animator
+    private static final int HOME = 0;
+    private static final int LOGIN = 1;
+    private static final int CREATE = 2;
+    private static final int WELCOME = 3;
+
     // Holds layout ids of each view we have navigated through
     private Stack<Integer> mNavigationStack;
     private int mCurrentView;
 
-    @Nullable @BindView(R.id.tv_username) TextView tvUsername;
-    @Nullable @BindView(R.id.tv_username_unavailable) TextView tvUsernameUnavailable;
-    @Nullable @BindView(R.id.et_username) EditText etUsername;
-    @Nullable @BindView(R.id.et_password) EditText etPassword;
-    @Nullable @BindView(R.id.iv_outline) ImageView ivProfile;
-    @Nullable @BindView(R.id.iv_border) ImageView ivBorder;
-    @Nullable @BindView(R.id.btn_create_account) Button btnCreateAccount;
+    ViewAnimator viewAnimator;
+    @BindView(R.id.tv_username) TextView tvUsername;
+    @BindView(R.id.tv_username_unavailable) TextView tvUsernameUnavailable;
+    @BindView(R.id.et_username_create) EditText etUsernameCreate;
+    @BindView(R.id.et_password_create) EditText etPasswordCreate;
+    @BindView(R.id.et_username) EditText etUsername;
+    @BindView(R.id.et_password) EditText etPassword;
+    @BindView(R.id.iv_outline) ImageView ivProfile;
+    @BindView(R.id.iv_border) ImageView ivBorder;
+    @BindView(R.id.btn_create_account) Button btnCreateAccount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,10 +58,36 @@ public class AuthenticateActivity extends AppCompatActivity {
         }
 
         // Set the current view
-        setContentView(mCurrentView = R.layout.activity_authenticate_home);
+        setContentView(R.layout.activity_authenticate);
+
+        initViewAnimator();
+
+        // Now that all views have been inflated, use butterknife to bind the rest of the views
+        ButterKnife.bind(this);
 
         // Initialize the navigation stack
         mNavigationStack = new Stack<>();
+    }
+
+    /**
+     * Adds all views to the view animator and sets up the animations
+     */
+    private void initViewAnimator() {
+        // Add views to the view animator
+        viewAnimator = findViewById(R.id.view_animator);
+        viewAnimator.addView(
+                getLayoutInflater().inflate(R.layout.activity_authenticate_home, null), HOME);
+        viewAnimator.addView(
+                getLayoutInflater().inflate(R.layout.activity_authenticate_login, null), LOGIN);
+        viewAnimator.addView(
+                getLayoutInflater().inflate(R.layout.activity_authenticate_create, null), CREATE);
+        viewAnimator.addView(
+                getLayoutInflater().inflate(R.layout.activity_authenticate_welcome, null), WELCOME);
+
+        // Set up view animator animations
+        viewAnimator.setAnimateFirstView(false);
+        viewAnimator.setInAnimation(this, R.anim.fade_in);
+        viewAnimator.setOutAnimation(this, R.anim.fade_out);
     }
 
     /**
@@ -60,28 +95,25 @@ public class AuthenticateActivity extends AppCompatActivity {
      */
     @Override
     public void onBackPressed() {
-        // If the navigation stack is empty then do the default behavior
         if(mNavigationStack.empty()) {
+            // If the navigation stack is empty then do the default behavior
             super.onBackPressed();
         } else {
-            // Get the previous view from the navigation stack
-            setContentView(mCurrentView = mNavigationStack.pop());
+            // Otherwise get the previous view from the navigation stack
+            viewAnimator.setDisplayedChild(mCurrentView = mNavigationStack.pop());
         }
     }
 
     public void switchToLoginView(View view) {
         mNavigationStack.push(mCurrentView);
-        setContentView(mCurrentView = R.layout.activity_authenticate_login);
-        ButterKnife.bind(this);
+        viewAnimator.setDisplayedChild(mCurrentView = LOGIN);
     }
 
     public void switchToCreateView(View view) {
         mNavigationStack.push(mCurrentView);
-        setContentView(mCurrentView = R.layout.activity_authenticate_create);
-        ButterKnife.bind(this);
+        viewAnimator.setDisplayedChild(mCurrentView = CREATE);
 
-
-        etUsername.addTextChangedListener(new TextWatcher() {
+        etUsernameCreate.addTextChangedListener(new TextWatcher() {
             ParseQuery query = null;
 
             @Override
@@ -90,7 +122,7 @@ public class AuthenticateActivity extends AppCompatActivity {
                 if(query != null && query.isRunning()) query.cancel();
 
                 // Set the edit text color back to normal
-                etUsername.setBackground(getResources().getDrawable(R.drawable.et_default));
+                etUsernameCreate.setBackground(getResources().getDrawable(R.drawable.et_default));
 
                 // Check if the username is available
                 query = User.isUsernameAvailable(s.toString(), isAvailable -> {
@@ -98,7 +130,7 @@ public class AuthenticateActivity extends AppCompatActivity {
                         // Update views to reflect a valid username
                         tvUsernameUnavailable.setVisibility(View.GONE);
                         if(!s.toString().isEmpty()) {
-                            etUsername.setBackground(getResources().getDrawable(R.drawable.et_green));
+                            etUsernameCreate.setBackground(getResources().getDrawable(R.drawable.et_green));
 
                             // Check if the password is also valid before enabling the button
                             if(!etPassword.getText().toString().isEmpty()) {
@@ -107,7 +139,7 @@ public class AuthenticateActivity extends AppCompatActivity {
                         }
                     } else {
                         // Update views to reflect an invalid username
-                        etUsername.setBackground(getResources().getDrawable(R.drawable.et_red));
+                        etUsernameCreate.setBackground(getResources().getDrawable(R.drawable.et_red));
                         tvUsernameUnavailable.setText(
                                 String.format("The username %s is not available", s.toString()));
                         tvUsernameUnavailable.setVisibility(View.VISIBLE);
@@ -123,7 +155,7 @@ public class AuthenticateActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
         });
 
-        etPassword.addTextChangedListener(new TextWatcher() {
+        etPasswordCreate.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
                 // Check if the username and password are valid and enable button accordingly
@@ -144,8 +176,7 @@ public class AuthenticateActivity extends AppCompatActivity {
 
     public void switchToWelcomeView(User user) {
         mNavigationStack.push(mCurrentView);
-        setContentView(mCurrentView = R.layout.activity_authenticate_welcome);
-        ButterKnife.bind(this);
+        viewAnimator.setDisplayedChild(mCurrentView = WELCOME);
 
         // Setup the profile image and border
         GlideApp.with(this)
@@ -153,7 +184,6 @@ public class AuthenticateActivity extends AppCompatActivity {
                 .transform(new CircleCrop())
                 .into(ivBorder);
         GlideApp.with(this)
-//                .load(user.getString("profile_image"))  TODO: Load profile image here
                 .load(R.drawable.avatar)
                 .transform(new CircleCrop())
                 .error(R.drawable.avatar)

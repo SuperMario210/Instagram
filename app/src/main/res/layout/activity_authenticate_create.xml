@@ -24,7 +24,7 @@
             app:srcCompat="@drawable/profile" />
 
         <EditText
-            android:id="@+id/et_username"
+            android:id="@+id/et_username_create"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
@@ -46,7 +46,7 @@
             app:layout_constraintTop_toBottomOf="@+id/iv_logo" />
 
         <EditText
-            android:id="@+id/et_password"
+            android:id="@+id/et_password_create"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
@@ -67,7 +67,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/et_username" />
+            app:layout_constraintTop_toBottomOf="@+id/et_username_create" />
 
         <Button
             android:id="@+id/btn_create_account"
@@ -89,7 +89,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/et_password" />
+            app:layout_constraintTop_toBottomOf="@+id/et_password_create" />
 
         <TextView
             android:id="@+id/tv_username_unavailable"
@@ -100,8 +100,8 @@
             android:textColor="@color/red_5"
             android:textSize="12sp"
             android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@+id/et_username"
-            app:layout_constraintStart_toStartOf="@+id/et_username" />
+            app:layout_constraintBottom_toTopOf="@+id/et_username_create"
+            app:layout_constraintStart_toStartOf="@+id/et_username_create" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
