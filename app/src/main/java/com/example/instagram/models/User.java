@@ -4,8 +4,8 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.example.instagram.callbacks.BooleanCallback;
-import com.example.instagram.callbacks.LoginCallback;
+import com.example.instagram.interfaces.BooleanCallback;
+import com.example.instagram.interfaces.LoginCallback;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseFile;

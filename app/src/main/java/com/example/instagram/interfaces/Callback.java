@@ -1,4 +1,4 @@
-package com.example.instagram.callbacks;
+package com.example.instagram.interfaces;
 
 public interface Callback<T> {
     void done(T t);

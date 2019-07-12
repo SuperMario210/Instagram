@@ -3,11 +3,9 @@ package com.example.instagram.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.example.instagram.ParseApp;
@@ -15,6 +13,7 @@ import com.example.instagram.R;
 import com.example.instagram.fragments.ComposeFragment;
 import com.example.instagram.fragments.HomeFragment;
 import com.example.instagram.fragments.ProfileFragment;
+import com.example.instagram.interfaces.BackPressListenerFragment;
 import com.example.instagram.models.Post;
 import com.example.instagram.models.User;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -22,12 +21,14 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements ComposeFragment.OnFragmentClosedListener, HomeFragment.OnProfileOpenedListener {
+public class MainActivity extends AppCompatActivity
+        implements ComposeFragment.OnFragmentClosedListener, HomeFragment.OnProfileOpenedListener {
+    // Fragments that this activity holds
     HomeFragment mHomeFragment;
     ComposeFragment mComposeFragment;
     ProfileFragment mProfileFragment;
     FragmentManager mFragmentManager;
-    Fragment mCurrentFragment;
+    BackPressListenerFragment mCurrentFragment;
 
     @BindView(R.id.fl_container) FrameLayout flContainer;
     @BindView(R.id.bottom_navigation) BottomNavigationView bnMenu;
@@ -36,7 +37,6 @@ public class MainActivity extends AppCompatActivity implements ComposeFragment.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         ButterKnife.bind(this);
 
         // Initialize fragments
@@ -48,76 +48,86 @@ public class MainActivity extends AppCompatActivity implements ComposeFragment.O
         initializeBottomNavigation();
     }
 
-    @Override
-    public void onAttachFragment(Fragment fragment) {
-        if (fragment instanceof ComposeFragment) {
-            ComposeFragment composeFragment = (ComposeFragment) fragment;
-            composeFragment.setOnFragmentClosedListener(this);
-        }
-    }
-
+    /**
+     * Sets up a listener to swap fragments when the bottom navigation is selected
+     */
     private void initializeBottomNavigation() {
         bnMenu.setOnNavigationItemSelectedListener(item -> {
-            mCurrentFragment = mHomeFragment;
-            switch (item.getItemId()) {
-                case R.id.action_home:
-                    mCurrentFragment = mHomeFragment;
-                    break;
-                case R.id.action_compose:
-                    mCurrentFragment = mComposeFragment;
-                    break;
-                case R.id.action_profile:
-                default:
-                    Toast.makeText(this, "Profile Fragment", Toast.LENGTH_SHORT).show();
-                    mCurrentFragment = mProfileFragment;
-                    break;
+            // Switch to the correct fragment based on which item was selected
+            if(item.getItemId() == R.id.action_home) {
+                mCurrentFragment = mHomeFragment;
+            } else if(item.getItemId() == R.id.action_compose) {
+                mCurrentFragment = mComposeFragment;
+            } else {
+                mCurrentFragment = mProfileFragment;
             }
             mFragmentManager.beginTransaction().replace(R.id.fl_container, mCurrentFragment).commit();
             return true;
         });
-
         bnMenu.setSelectedItemId(R.id.action_home);
     }
 
     @Override
     public void onBackPressed() {
-        if(mCurrentFragment == mComposeFragment) {
-            mComposeFragment.onBackPressed();
-        } else {
-            mFragmentManager.popBackStack();
+        // Let the active fragment handle the back press
+        if(mCurrentFragment.onBackPressed()) {
+            return;
         }
+
+        if(mFragmentManager.getBackStackEntryCount() > 0) {
+            // If the active fragment does not handle the back press, try to pop the back stack
+            mFragmentManager.popBackStack();
+        } else {
+            // If the back stack is empty, pass the back press up
+            super.onBackPressed();
+        }
+
     }
 
     @Override
-    public void onFragmentClosed() {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        // Pass on activity result to fragments.  This is mainly necessary for the media selector
+        // in the compose activity.
+        mCurrentFragment.onActivityResult(requestCode, resultCode, data);
+    }
+
+    /**
+     * Called when the compose fragment is exited without submitting a post
+     */
+    @Override
+    public void onComposeCancel() {
         mFragmentManager.beginTransaction().replace(R.id.fl_container, mHomeFragment).commit();
         bnMenu.setSelectedItemId(R.id.action_home);
     }
 
+    /**
+     * Called when the compose fragment sucessfully submits a post
+     * @param post the post submitted by the compose fragment
+     */
     @Override
-    public void onPostSubmitted(Post post) {
+    public void onComposeComplete(Post post) {
         ((ParseApp) getApplication()).getPosts().addPost(0, post);
         mFragmentManager.beginTransaction().replace(R.id.fl_container, mHomeFragment).commit();
         bnMenu.setSelectedItemId(R.id.action_home);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        mCurrentFragment.onActivityResult(requestCode, resultCode, data);
-    }
-
-
+    /**
+     * Handle a profile being opened
+     * @param user the user whose profile is being opened
+     */
     @Override
     public void onProfileOpened(User user) {
-        if(!user.getObjectId().equals(User.getCurrentUser().getObjectId())) {
+        boolean isCurrentUser = user.getObjectId().equals(User.getCurrentUser().getObjectId());
+        if(isCurrentUser) {
+            // Switch to the profile tab on the bottom navigation
+            bnMenu.setSelectedItemId(R.id.action_profile);
+        } else {
+            // Create a new profile fragment for the user and add it to the back stack
             ProfileFragment fragment = new ProfileFragment(user, false);
             mFragmentManager.beginTransaction()
                     .replace(R.id.fl_container, fragment)
                     .addToBackStack(null)
                     .commit();
-        } else {
-            bnMenu.setSelectedItemId(R.id.action_profile);
         }
     }
 }

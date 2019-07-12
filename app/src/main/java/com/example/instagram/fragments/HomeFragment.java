@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -17,6 +16,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.instagram.ParseApp;
 import com.example.instagram.R;
 import com.example.instagram.adapters.PostAdapter;
+import com.example.instagram.interfaces.BackPressListenerFragment;
 import com.example.instagram.models.Post;
 import com.example.instagram.models.PostData;
 import com.example.instagram.models.User;
@@ -30,7 +30,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends BackPressListenerFragment {
     private Unbinder mUnbinder;
     private PostAdapter mPostAdapter;
     private PostData mPosts;
@@ -129,6 +129,15 @@ public class HomeFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    /**
+     * Let the main activity handle the back press
+     * @return false
+     */
+    @Override
+    public boolean onBackPressed() {
+        return false;
     }
 
     public interface OnProfileOpenedListener {

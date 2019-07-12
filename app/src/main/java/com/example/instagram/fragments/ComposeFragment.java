@@ -2,6 +2,7 @@ package com.example.instagram.fragments;
 
 import android.Manifest;
 import android.animation.Animator;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -35,10 +36,10 @@ import androidx.camera.core.PreviewConfig;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.exifinterface.media.ExifInterface;
-import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.instagram.R;
+import com.example.instagram.interfaces.BackPressListenerFragment;
 import com.example.instagram.models.GlideApp;
 import com.example.instagram.models.Post;
 import com.example.instagram.models.User;
@@ -61,7 +62,7 @@ import butterknife.Unbinder;
 
 import static android.app.Activity.RESULT_OK;
 
-public class ComposeFragment extends Fragment {
+public class ComposeFragment extends BackPressListenerFragment {
     // Directory to save images in
     private static final String APP_TAG = "fbu_instagram";
     // Request code for camera permission
@@ -70,7 +71,7 @@ public class ComposeFragment extends Fragment {
     private Unbinder mUnbinder;
     private Bitmap mBitmap;
     private View mView;
-    private OnFragmentClosedListener mClosedListener;
+    private OnFragmentClosedListener mListener;
     private Post mPost;
 
     // CameraX variables
@@ -87,6 +88,7 @@ public class ComposeFragment extends Fragment {
     @BindView(R.id.et_caption) EditText etCaption;
     @BindView(R.id.iv_gallery) ImageView ivGallery;
     @BindView(R.id.pb_loading) ProgressBar pbLoading;
+
 
     /**
      * This enum holds the different states that the compose fragment can be in (taking a picture,
@@ -162,6 +164,12 @@ public class ComposeFragment extends Fragment {
         mUnbinder.unbind();
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
     /**
      * Updates the transformation to ensure the camera preview is displayed correctly
      */
@@ -226,7 +234,7 @@ public class ComposeFragment extends Fragment {
 
         // Setup the toolbar
         toolbar.setNavigationOnClickListener(v -> {
-            mClosedListener.onFragmentClosed();
+            mListener.onComposeCancel();
             // todo: return to previous fragment
         });
         toolbar.setNavigationIcon(R.drawable.ic_vector_close);
@@ -373,7 +381,7 @@ public class ComposeFragment extends Fragment {
                 if(e == null) {
                     Toast.makeText(getContext(), "Post shared successfully", Toast.LENGTH_SHORT).show();
                     etCaption.setText("");
-                    mClosedListener.onPostSubmitted(mPost);
+                    mListener.onComposeComplete(mPost);
                 } else {
                     Log.e("ComposeFragment", "Could not save post", e);
                     Toast.makeText(getContext(), "Couldn't share post!", Toast.LENGTH_LONG);
@@ -385,23 +393,14 @@ public class ComposeFragment extends Fragment {
         }
     }
 
-    public void setOnFragmentClosedListener(OnFragmentClosedListener listener) {
-        mClosedListener = listener;
-    }
 
-    public void onBackPressed() {
-        switch(mCurrentState) {
-            case FILTER:
-                break;
-            case CAPTION:
-                switchToPictureView();
-                break;
-            case PICTURE:
-                mClosedListener.onFragmentClosed();
-                break;
-            default:
-                break;
+    public boolean onBackPressed() {
+        if(mCurrentState == ComposeState.CAPTION) {
+            switchToPictureView();
+        } else if(mCurrentState == ComposeState.PICTURE) {
+            mListener.onComposeCancel();
         }
+        return true;
     }
 
     @Override
@@ -429,9 +428,35 @@ public class ComposeFragment extends Fragment {
         });
     }
 
-    public interface OnFragmentClosedListener {
-        void onFragmentClosed();
+    /**
+     * Override the onAttach function to keep a reference to the attached context for interfacing
+     * with the activity this fragment is attached to
+     * @param context
+     */
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnFragmentClosedListener) {
+            mListener = (OnFragmentClosedListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
 
-        void onPostSubmitted(Post post);
+    /**
+     * Interface for interacting with the activity the fragment is attached to
+     */
+    public interface OnFragmentClosedListener {
+        /**
+         * Called when the compose fragment is closed without submitting a post
+         */
+        void onComposeCancel();
+
+        /**
+         * Called when the compose fragment successfully submits a post
+         * @param post the post submitted by the compose fragment
+         */
+        void onComposeComplete(Post post);
     }
 }

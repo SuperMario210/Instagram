@@ -12,7 +12,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,6 +19,7 @@ import com.example.instagram.R;
 import com.example.instagram.activities.AuthenticateActivity;
 import com.example.instagram.adapters.ProfileAdapter;
 import com.example.instagram.adapters.SpaceItemDecoration;
+import com.example.instagram.interfaces.BackPressListenerFragment;
 import com.example.instagram.models.Post;
 import com.example.instagram.models.User;
 import com.example.instagram.util.BitmapUtils;
@@ -43,7 +43,7 @@ import butterknife.Unbinder;
 
 import static android.app.Activity.RESULT_OK;
 
-public class ProfileFragment extends Fragment {
+public class ProfileFragment extends BackPressListenerFragment {
     private final static int COLUMN_COUNT = 3;
 
     private Unbinder mUnbinder;
@@ -171,5 +171,14 @@ public class ProfileFragment extends Fragment {
             Toast.makeText(getContext(), "Couldn't save image", Toast.LENGTH_LONG);
         }
 
+    }
+
+    /**
+     * Let the main activity handle the back press
+     * @return false
+     */
+    @Override
+    public boolean onBackPressed() {
+        return false;
     }
 }

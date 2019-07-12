@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.instagram.R;
-import com.example.instagram.callbacks.VoidCallback;
+import com.example.instagram.interfaces.VoidCallback;
 import com.example.instagram.models.GlideApp;
 import com.example.instagram.models.Post;
 import com.example.instagram.models.User;

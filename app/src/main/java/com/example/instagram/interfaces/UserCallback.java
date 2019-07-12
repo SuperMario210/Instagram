@@ -1,4 +1,4 @@
-package com.example.instagram.callbacks;
+package com.example.instagram.interfaces;
 
 import com.example.instagram.models.User;
 

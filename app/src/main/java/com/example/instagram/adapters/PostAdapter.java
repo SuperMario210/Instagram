@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.instagram.R;
-import com.example.instagram.callbacks.UserCallback;
+import com.example.instagram.interfaces.UserCallback;
 import com.example.instagram.models.Post;
 import com.example.instagram.models.PostData;
 
