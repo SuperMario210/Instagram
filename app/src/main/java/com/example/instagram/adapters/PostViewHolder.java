@@ -33,7 +33,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
     private User mUser;
     private Context mContext;
     private Post mPost;
-    private UserCallback mCallback;
+    private UserCallback mProfileOpenedCallback;
     private View mRoot;
 
     @BindView(R.id.iv_outline) ImageView ivProfile;
@@ -54,11 +54,16 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
         ButterKnife.bind(this, view);
     }
 
-    public void bindPost(Post post, Context context, UserCallback callback) {
+    /**
+     * @param post the post whose information should be displayed
+     * @param context the activity context
+     * @param profileOpenedCallback callback to run when a profile is opened
+     */
+    public void bindPost(Post post, Context context, UserCallback profileOpenedCallback) {
         mPost = post;
         mContext = context;
         mUser = post.getUser();
-        mCallback = callback;
+        mProfileOpenedCallback = profileOpenedCallback;
 
         if(mPost.getDescription().isEmpty()) {
             tvCaption.setVisibility(View.GONE);
@@ -94,7 +99,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
         tvUsername.setText(mPost.getUser().getUsername());
         tvDate.setText(mPost.formatDate(mPost.getCreatedAt()));
 
-        View.OnClickListener listener = v -> mCallback.done(mUser);
+        View.OnClickListener listener = v -> mProfileOpenedCallback.done(mUser);
         tvUsername.setOnClickListener(listener);
         ivProfile.setOnClickListener(listener);
     }

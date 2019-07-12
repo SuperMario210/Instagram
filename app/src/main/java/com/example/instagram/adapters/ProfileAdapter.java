@@ -29,6 +29,10 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+/**
+ * The profile adapter is unique in that it uses a different view for the first item displayed
+ * (shows user information)
+ */
 public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static final int FIRST_ITEM = 0;
     public static final int NORMAL_ITEM = 1;
@@ -40,6 +44,13 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private ProfileViewHolder mProfileHolder;
     private boolean mIsCurrentUser;
 
+    /**
+     * @param posts the list of posts made by the user
+     * @param context the activity context
+     * @param user the user whose profile is being displayed
+     * @param isCurrentUser whether of not the user is the currently authenticated user
+     * @param logOutCallback callback to run when the log out button is clicked
+     */
     public ProfileAdapter(List<Post> posts, Context context, User user, boolean isCurrentUser,
                           VoidCallback logOutCallback) {
         mPosts = posts;
@@ -55,12 +66,17 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         notifyDataSetChanged();
     }
 
+    /**
+     * Updates the user's profile image
+     * @param bitmap
+     */
     public void setProfileImage(Bitmap bitmap) {
         mProfileHolder.setProfileImage(bitmap);
     }
 
     @Override
     public int getItemViewType(int position) {
+        // Return a different item type for the first item
         if (position == 0) return FIRST_ITEM;
         else return NORMAL_ITEM;
     }
@@ -71,6 +87,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View gridView;
 
+        // Inflate a different view and use a different view holder for the first item
         if (viewType == FIRST_ITEM) {
             gridView = inflater.inflate(R.layout.item_profile, parent, false);
             mProfileHolder = new ProfileViewHolder(gridView);
@@ -83,6 +100,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, int position) {
+        // Bind a user the the first item and a post to the others
         if(holder.getItemViewType() == FIRST_ITEM) {
             mProfileHolder.bindUser(mUser, mContext);
         } else {
@@ -93,10 +111,14 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public int getItemCount() {
+        // Include an extra item for the user information layout
         return mPosts.size() + 1;
     }
 
-    public class PostGridViewHolder extends RecyclerView.ViewHolder {
+    /**
+     * The view holder for the user's posts (other items)
+     */
+    protected class PostGridViewHolder extends RecyclerView.ViewHolder {
         private Context mContext;
         private Post mPost;
 
@@ -117,7 +139,10 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
-    public class ProfileViewHolder extends RecyclerView.ViewHolder {
+    /**
+     * The view holder for the user information layout (first item)
+     */
+    protected class ProfileViewHolder extends RecyclerView.ViewHolder {
         private Context mContext;
         private User mUser;
 

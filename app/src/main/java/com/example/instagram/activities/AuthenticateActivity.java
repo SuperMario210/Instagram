@@ -54,9 +54,9 @@ public class AuthenticateActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Bypass authentication activity if user is already logged in
-//        if(User.getCurrentUser() != null) {
-//            switchToHomeActivity(null);
-//        }
+        if(User.getCurrentUser() != null) {
+            switchToHomeActivity(null);
+        }
 
         // Set the current view
         setContentView(R.layout.activity_authenticate);
